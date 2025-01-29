@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit">Login</button>
+        </form>
+        <div id="g_id_onload"
+            data-client_id="YOUR_GOOGLE_CLIENT_ID"
+            data-context="signin"
+            data-ux_mode="popup"
+            data-callback="handleGoogleLogin"
+            data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin" data-type="standard"></div>
+    </div>
+    
+    <script>
+        document.getElementById("login-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            console.log("Email:", email, "Password:", password);
+            alert("Login attempt with email: " + email);
+        });
+        
+        function handleGoogleLogin(response) {
+            console.log("Google login response:", response);
+            alert("Logged in with Google!");
+        }
+    </script>
+</body>
+</html>
