@@ -6,7 +6,7 @@ import ollama as o
 import pdfplumber
 
 
-BASE_MODEL = 'llama2-uncensored'
+BASE_MODEL = 'llama3.1'
 
 model = 'cover-letter-generator'
 system = open("prompt.md", encoding="utf-8").read()
@@ -21,7 +21,7 @@ app.secret_key = os.urandom(24)
 def test():
 
 	test_resume = parse_pdf("test_resume.pdf")
-	test_input = open("test_input_1.txt", encoding="utf-8").read()
+	test_input = open("test_input_2.txt", encoding="utf-8").read()
 	
 	examples = []
 	n = 1
