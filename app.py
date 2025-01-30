@@ -34,38 +34,53 @@ def test():
 		)]
 		n += 1
 
-	open("test_output.txt", "w", encoding="utf-8") \
-		.write(generate(examples=examples, resume=test_resume, job_posting=test_input))
+	feedback = []
+	while True:
+		open("test_output.txt", "w", encoding="utf-8") \
+			.write(generate(examples=examples, resume=test_resume, job_posting=test_input, comments=feedback))
+		feedback += [input("Feedback: ")]
 
 
-def parse_pdf(filename: str) -> str:
-	text = ""
-	with pdfplumber.open(filename) as pdf:
-		for page in pdf.pages:
-			text += page.extract_text() + "\n"
-	return text
-
-
-def generate(examples=[], resume="", job_posting=""):
+def generate(examples=[], resume="", job_posting="", comments=[]):
 	
 	messages = []
 
-	def format_user_message(resume, job_posting):
-		return "\n".join([
+	def format_user_message(resume, job_posting, comments=[]):
+		
+		lines = [
 			"Read this candidate's resume:",
 			"```",
 			resume,
 			"```",
 			"",
-			"And read this job posting:"
+			"And read this job posting:",
 			"```",
 			job_posting,
-			"```",
+			"```"
+		]
+
+		if len(comments) > 0:
+
+			lines += [
+				"", 
+				"The candidate also stated the following:",
+				"```"
+			]
+
+			lines += comments
+			
+			lines += ["```"]
+
+		lines += [
 			"",
 			"Now write the candidate's cover letter based on their resume and the job posting.",
 			"",
 			"Reply ONLY with the cover letter, no commentary!"
-		])
+		]
+
+		# print(*lines)
+
+		return "\n".join(lines)
 
 	for r, j, c in examples:
 		messages += [
@@ -82,9 +97,11 @@ def generate(examples=[], resume="", job_posting=""):
 	messages += [
 		{
 			"role": "user",
-			"content": format_user_message(resume, job_posting)
+			"content": format_user_message(resume, job_posting, comments)
 		}
 	]
+
+	# print([message["content"] for message in messages])
 
 	cover_letter = ollama \
 		.chat(model, messages=messages) \
@@ -136,7 +153,7 @@ def verify(resume, cover_letter):
 
 	differences = ollama.chat(model, messages=messages).message.content
 
-	print(f"Differences: {differences}")
+	# print(f"Differences: {differences}")
 
 	messages += [
 		{
@@ -177,6 +194,41 @@ def revise(messages, justification, resume):
 		.strip() \
 		.replace("\n\n", "\n") \
 		.replace("\n", "\n\n")
+
+
+def parse_pdf(filename: str) -> str:
+	text = ""
+	with pdfplumber.open(filename) as pdf:
+		for page in pdf.pages:
+			text += page.extract_text() + "\n"
+	return text #text_to_markdown(text)
+
+
+def text_to_markdown(text: str) -> str:
+
+	messages = [
+		{
+			"role": "user",
+			"content": "Please format the following text in markdown.\n\n" \
+				"```\n" \
+				f"{text}\n" \
+				"```\n\n" \
+				"Reply ONLY with the markdown, no commentary!"
+		}
+	]
+
+	reply = ollama.chat(model=BASE_MODEL, messages=messages) \
+		.message \
+		.content \
+		.replace("\n", "\n\n")
+
+	if "```" in reply:
+		try:
+			reply = reply.split("```")[1]
+		except Exception as e:
+			print(f"Error: {e}")
+
+	return reply
 
 
 @app.before_request
@@ -258,7 +310,7 @@ def api_resume_upload():
 
 	# Extract the text from the temporary file
 	text = parse_pdf(filename)
-	print(text)
+	# print(text)
 
 	# Save extracted text in session cookie
 	session["resume"] = text
@@ -279,7 +331,7 @@ def api_resume_edit():
 
 	# Get the resume text from the request
 	text = request.json["resume"]
-	print(text)
+	# print(text)
 
 	# Save the resume text in session cookie
 	session["resume"] = text
