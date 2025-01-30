@@ -38,7 +38,9 @@ def test():
 	while True:
 		open("test_output.txt", "w", encoding="utf-8") \
 			.write(generate(examples=examples, resume=test_resume, job_posting=test_input, comments=feedback))
-		feedback += [input("Feedback: ")]
+		f = input("Feedback: ")
+		if f:
+			feedback += [f]
 
 
 def generate(examples=[], resume="", job_posting="", comments=[]):
@@ -67,7 +69,7 @@ def generate(examples=[], resume="", job_posting="", comments=[]):
 				"```"
 			]
 
-			lines += comments
+			lines += [f"- {comment}" for comment in comments]
 			
 			lines += ["```"]
 
