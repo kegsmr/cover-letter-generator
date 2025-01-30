@@ -21,7 +21,7 @@ app.secret_key = os.urandom(24)
 def test():
 
 	test_resume = parse_pdf("test_resume.pdf")
-	test_input = open("test_input_2.txt", encoding="utf-8").read()
+	test_input = open("test_input_1.txt", encoding="utf-8").read()
 	
 	examples = []
 	n = 1
@@ -62,7 +62,9 @@ def generate(examples=[], resume="", job_posting=""):
 			job_posting,
 			"```",
 			"",
-			"Now write the candidate's cover letter based on their resume and the job posting."
+			"Now write the candidate's cover letter based on their resume and the job posting.",
+			"",
+			"Reply ONLY with the cover letter, no commentary!"
 		])
 
 	for r, j, c in examples:
@@ -99,7 +101,7 @@ def generate(examples=[], resume="", job_posting=""):
 		}
 	]
 
-	for _ in range(3):
+	for _ in range(5):
 		v = verify(resume, cover_letter)
 		if v is True:
 			return cover_letter
@@ -161,7 +163,7 @@ def revise(messages, justification, resume):
 
 	messages += [{
 		"role": "user",
-		"content": f"Write a revised version of the cover letter.\n\nRemove qualifications not mentioned in the resume:\n```\n{resume}\n```"
+		"content": f"Write a revised version of the cover letter.\n\nRemove qualifications not mentioned in the resume:\n```\n{resume}\n```\n\nReply ONLY with the cover letter, no commentary!"
 	}]
 
 	cover_letter = ollama.chat(model, messages=messages).message.content
