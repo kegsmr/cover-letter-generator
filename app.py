@@ -49,7 +49,22 @@ def cmd():
 	except Exception as e:
 		raise Exception("Please save your resume with the filename `resume.pdf`.") from e
 
-	_input = get_job_posting(input("Job URL: "))
+	_input = input("Job URL/description: ")
+	if _input.startswith("http://") or _input.startswith("https://"):
+		_input = get_job_posting(_input)
+	else:
+		i = True
+		while True:
+			try:
+				if i:
+					i = input()
+				else:
+					i = input("(Press <CTRL+C> to end) ")
+			except KeyboardInterrupt:
+				print()
+				break
+			_input += f"\n{i}"
+		_input = text_to_markdown(_input)
 
 	print("\033[34m")
 	[print(line) for line in _input.splitlines()]
