@@ -1,6 +1,7 @@
 import subprocess
 import tempfile
 import os
+import shutil
 
 from flask import Flask, render_template, redirect, request, session
 import ollama as o
@@ -32,27 +33,48 @@ def test():
 		test_resume = open("test_resume.md", encoding="utf-8").read()
 
 	test_input = get_job_posting(input("Job URL: "))
-	
+
+	print("\033[34m")
+	[print(line) for line in test_input.splitlines()]
+	print("\033[0m")
+
 	open("test_input.md", "w", encoding="utf-8").write(test_input)
 
 	examples = []
 	n = 1
-	while os.path.exists(f"test_example_input_{n}") \
-		and os.path.exists(f"test_example_output_{n}"):
+	while os.path.exists(f"test_input_{n}.md") \
+		and os.path.exists(f"test_output_{n}.md"):
 		examples += [(
 			test_resume,
-			open(f"test_example_input_{n}.txt", encoding="utf-8").read(),
-			open(f"test_example_output_{n}.txt", encoding="utf-8").read()
+			open(f"test_input_{n}.md", encoding="utf-8").read(),
+			open(f"test_output_{n}.md", encoding="utf-8").read()
 		)]
 		n += 1
 
 	feedback = []
 	while True:
-		open("test_output.txt", "w", encoding="utf-8") \
-			.write(generate(examples=examples, resume=test_resume, job_posting=test_input, comments=feedback))
-		f = input("Feedback: ")
+		test_output = generate(examples=examples, resume=test_resume, job_posting=test_input, comments=feedback)
+		open("test_output.md", "w", encoding="utf-8") \
+			.write(test_output)
+		print("\033[32m")
+		[print(line) for line in test_output.splitlines()]
+		print("\033[0m")
+		try:
+			f = input("Feedback: ")
+		except KeyboardInterrupt:
+			break
 		if f:
 			feedback += [f]
+
+	if input("\nSave? (y/n):").lower() == "y":
+
+		n = 1
+		while os.path.exists(f"test_input_{n}.md") \
+			and os.path.exists(f"test_output_{n}.md"):
+			n += 1
+
+		shutil.copy("test_input.md", f"test_input_{n}.md")
+		shutil.copy("test_output.md", f"test_output_{n}.md")
 
 
 def generate(examples=[], resume="", job_posting="", comments=[]):
