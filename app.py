@@ -2,6 +2,7 @@ import subprocess
 import tempfile
 import os
 import shutil
+from argparse import ArgumentParser
 
 from flask import Flask, render_template, redirect, request, session
 import ollama as o
@@ -22,6 +23,19 @@ ollama = o.Client()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)	
+
+
+def main():
+
+	parser = ArgumentParser()
+	parser.add_argument("-s", "--serve", action="store_true")
+
+	args = parser.parse_args()
+
+	if args.serve:
+		app.run(debug=True)
+	else:
+		cmd()
 
 
 def cmd():
@@ -448,5 +462,4 @@ def api_generate():
 
 
 if __name__ == "__main__":
-	cmd()
-	# app.run(debug=True)
+	main()
