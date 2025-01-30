@@ -1,2 +1,4 @@
-test_*.md
-test_*.pdf
+input*.md
+output*.md
+resume.md
+resume.pdf

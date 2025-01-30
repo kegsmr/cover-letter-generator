@@ -24,40 +24,43 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)	
 
 
-def test():
+def cmd():
 
-	if not os.path.exists("test_resume.md"):
-		test_resume = parse_pdf("test_resume.pdf")
-		open("test_resume.md", "w", encoding="utf-8").write(test_resume)
-	else:
-		test_resume = open("test_resume.md", encoding="utf-8").read()
+	try:
+		if not os.path.exists("resume.md"):
+			_resume = parse_pdf("resume.pdf")
+			open("resume.md", "w", encoding="utf-8").write(_resume)
+		else:
+			_resume = open("resume.md", encoding="utf-8").read()
+	except Exception as e:
+		raise Exception("Please save your resume with the filename `resume.pdf`.") from e
 
-	test_input = get_job_posting(input("Job URL: "))
+	_input = get_job_posting(input("Job URL: "))
 
 	print("\033[34m")
-	[print(line) for line in test_input.splitlines()]
+	[print(line) for line in _input.splitlines()]
 	print("\033[0m")
 
-	open("test_input.md", "w", encoding="utf-8").write(test_input)
+	open("input.md", "w", encoding="utf-8").write(_input)
 
 	examples = []
 	n = 1
-	while os.path.exists(f"test_input_{n}.md") \
-		and os.path.exists(f"test_output_{n}.md"):
+	while os.path.exists(f"input_{n}.md") \
+		and os.path.exists(f"output_{n}.md"):
 		examples += [(
-			test_resume,
-			open(f"test_input_{n}.md", encoding="utf-8").read(),
-			open(f"test_output_{n}.md", encoding="utf-8").read()
+			_resume,
+			open(f"input_{n}.md", encoding="utf-8").read(),
+			open(f"output_{n}.md", encoding="utf-8").read()
 		)]
 		n += 1
 
 	feedback = []
 	while True:
-		test_output = generate(examples=examples, resume=test_resume, job_posting=test_input, comments=feedback)
-		open("test_output.md", "w", encoding="utf-8") \
-			.write(test_output)
+		_output = generate(examples=examples, resume=_resume, job_posting=_input, comments=feedback)
+		open("output.md", "w", encoding="utf-8") \
+			.write(_output)
 		print("\033[32m")
-		[print(line) for line in test_output.splitlines()]
+		[print(line) for line in _output.splitlines()]
 		print("\033[0m")
 		try:
 			f = input("Feedback: ")
@@ -66,15 +69,15 @@ def test():
 		if f:
 			feedback += [f]
 
-	if input("\nSave? (y/n):").lower() == "y":
+	if input("\nSave? (y/n): ").lower() == "y":
 
 		n = 1
-		while os.path.exists(f"test_input_{n}.md") \
-			and os.path.exists(f"test_output_{n}.md"):
+		while os.path.exists(f"input_{n}.md") \
+			and os.path.exists(f"output_{n}.md"):
 			n += 1
 
-		shutil.copy("test_input.md", f"test_input_{n}.md")
-		shutil.copy("test_output.md", f"test_output_{n}.md")
+		shutil.copy("input.md", f"input_{n}.md")
+		shutil.copy("output.md", f"output_{n}.md")
 
 
 def generate(examples=[], resume="", job_posting="", comments=[]):
@@ -445,5 +448,5 @@ def api_generate():
 
 
 if __name__ == "__main__":
-	test()
+	cmd()
 	# app.run(debug=True)
