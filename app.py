@@ -1,10 +1,15 @@
+import subprocess
 import tempfile
 import os
 
 from flask import Flask, render_template, redirect, request, session
 import ollama as o
 import pdfplumber
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
+
+subprocess.run(["python", "-m", "playwright", "install"], check=True)
 
 BASE_MODEL = 'llama3.1'
 
@@ -20,9 +25,16 @@ app.secret_key = os.urandom(24)
 
 def test():
 
-	test_resume = parse_pdf("test_resume.pdf")
-	test_input = open("test_input_1.txt", encoding="utf-8").read()
+	if not os.path.exists("test_resume.md"):
+		test_resume = parse_pdf("test_resume.pdf")
+		open("test_resume.md", "w", encoding="utf-8").write(test_resume)
+	else:
+		test_resume = open("test_resume.md", encoding="utf-8").read()
+
+	test_input = get_job_posting(input("Job URL: "))
 	
+	open("test_input.md", "w", encoding="utf-8").write(test_input)
+
 	examples = []
 	n = 1
 	while os.path.exists(f"test_example_input_{n}") \
@@ -203,7 +215,70 @@ def parse_pdf(filename: str) -> str:
 	with pdfplumber.open(filename) as pdf:
 		for page in pdf.pages:
 			text += page.extract_text() + "\n"
-	return text #text_to_markdown(text)
+	return text_to_markdown(text)
+
+
+def get_html(url: str) -> str:
+	with sync_playwright() as p:
+		browser = p.chromium.launch(headless=True)
+		page = browser.new_page()
+		page.goto(url)
+		content = page.content()
+		browser.close()
+		return content
+
+
+def get_job_posting(url: str):
+
+	html = get_html(url)
+	text = parse_html(html)
+
+
+	messages = [
+		{
+			"role": "user",
+			"content": "The following text was extracted from a job posting website.\n\n" \
+				"```\n" \
+				f"{text}\n" \
+				"```\n\n" \
+				"Please format all text relevant to the job posting into markdown, include all relevant information.\n\n"
+				"Reply ONLY with the markdown, no commentary!"
+		}
+	]
+
+	reply = ollama.chat(model=BASE_MODEL, messages=messages) \
+		.message \
+		.content \
+		.replace("\n", "\n\n")
+
+	if "```" in reply:
+		try:
+			reply = reply.split("```")[1]
+		except Exception as e:
+			print(f"Error: {e}")
+
+	return reply
+
+
+
+def parse_html(html: str):
+
+	# Parse the HTML with BeautifulSoup
+	soup = BeautifulSoup(html, 'html.parser')
+	
+	# Remove unwanted elements (e.g., script, style, etc.)
+	for unwanted in soup(['script', 'style', 'head', 'meta', 'noscript']):
+		unwanted.decompose()
+	
+	# Extract the visible text
+	visible_text = soup.get_text(separator='\n').strip()
+	
+	t = []
+	for line in visible_text.splitlines():
+		if line:
+			t.append(line.strip())
+
+	return "\n".join(t)
 
 
 def text_to_markdown(text: str) -> str:
@@ -231,7 +306,7 @@ def text_to_markdown(text: str) -> str:
 			print(f"Error: {e}")
 
 	return reply
-
+	
 
 @app.before_request
 def make_session_permanent():
