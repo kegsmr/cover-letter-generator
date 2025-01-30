@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cover Letter Generator</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+
+        <h2>Edit Your Resume</h2>
+
+        <form id="resume-form">
+
+            <!-- Section to display extracted text in an editable field -->
+            <textarea id="extracted-text" name="extracted-text" rows="10" cols="50"></textarea>
+            
+            <br>
+
+            <button type="submit">Continue</button>
+            
+        </form>
+
+    </div>
+    
+    <script>
+
+        // Pre-fill the extracted text when the page loads
+        window.onload = function() {
+            try {
+                const extractedText = "{{ text }}";  // Server-side injected variable (Flask)
+                document.getElementById("extracted-text").value = extractedText;
+            } catch (error) {
+                document.getElementById("extracted-text").value = `Error: ${error}`;
+            }
+        };
+
+        // Handle form submission
+        document.getElementById("resume-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            // Get the resume text from the textarea
+            const resumeText = document.getElementById("extracted-text").value;
+
+            // Check if the textarea is empty
+            if (!resumeText.trim()) {
+                alert("Please enter your resume text.");
+                return;
+            }
+
+            // Prepare the data to be sent to the API
+            const data = { resume: resumeText };
+
+            try {
+                // Send the updated resume text to the backend via the new API endpoint
+                const response = await fetch("/api/resume/edit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    window.location.replace("/");
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        });
+
+    </script>
+</body>
+</html>

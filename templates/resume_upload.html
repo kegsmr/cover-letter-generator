@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cover Letter Generator</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <h2>Upload Your Resume</h2>
+        <form id="resume-form">
+            <!-- Section to upload resume -->
+            <label for="resume">Upload Resume:</label>
+            <input type="file" id="resume" name="resume" accept=".pdf" required>
+            
+			<button type="submit">Continue</button>
+        </form>
+    </div>
+    
+    <script>
+        document.getElementById("resume-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const resume = document.getElementById("resume").files[0];
+            
+            if (!resume) {
+                alert("Please upload a resume.");
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append("resume", resume);
+            
+            try {
+                const response = await fetch("/api/resume/upload", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    window.location.replace("/resume/edit");
+                } else {
+                    console.error(result.error);
+                }
+            } catch (error) {
+                console.error(error)
+            }
+
+        });
+    </script>
+</body>
+</html>
