@@ -1,67 +1,69 @@
 # AI Cover Letter Generator
 
-This project is a web-based application that allows users to upload their resume in PDF format, extract text from it, edit the extracted text, and generate cover letters tailored to job postings. The application is built using Flask, Playwright, pdfplumber, BeautifulSoup, and Ollama for AI-generated content.
+## Overview
+
+This application generates tailored cover letters based on job descriptions. It extracts relevant information from a user's resume and refines it according to the job posting.
 
 ## Features
-- Upload a resume in PDF format
-- Extract and edit resume text
-- Input job descriptions manually or extract from URLs
-- Generate AI-assisted cover letters based on resume and job description
-- Store session-based resume data for easy editing
 
-## Requirements
-Ensure you have the following dependencies installed:
+- Extracts text from PDF resumes
+- Parses job descriptions from URLs or user input
+- Generates optimized cover letters based on past examples
+- Supports iterative feedback for refinement
 
-```
-bs4
-flask
-ollama
-pdfplumber
-playwright
-```
+## Installation
 
-You can install them using:
-```
-pip install -r requirements.txt
-```
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/yourusername/cover-letter-generator.git
+   cd cover-letter-generator
+   ```
+2. Install dependencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
 
 ## Usage
 
-### Running the Application
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   cd <project-directory>
-   ```
-2. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-3. Start the Flask server:
-   ```
-   python app.py
-   ```
-4. Open your browser and go to `http://127.0.0.1:5000/`
+There are two ways to use this application:
 
-### Uploading a Resume
-- Navigate to `/resume/upload`
-- Upload a PDF file
-- The extracted text will be stored in the session
+### 1. As a Flask Web App
 
-### Editing Resume Text
-- Navigate to `/resume/edit`
-- Modify the extracted text as needed
+Run the following command to start the web interface:
 
-### Generating a Cover Letter
-- Provide a job description or URL
-- The system extracts job details and generates a cover letter using AI
-- Users can refine the cover letter with iterative feedback
+```sh
+python app.py
+```
+
+Then, navigate to `http://127.0.0.1:5000/` in your web browser to use the application.
+
+### 2. As a Command-Line Utility
+
+Run the following command:
+
+```sh
+python generator.py
+```
+
+#### Example Usage
+
+```
+Job URL/description: https://www.linkedin.com/jobs/view/4076660630
+
+**Software Engineer Jobs**
+...
+
+Feedback:
+```
+
+The command-line tool will extract job descriptions from the provided URL or allow manual input. It then generates a cover letter draft, which the user can refine with iterative feedback before saving the final version.
 
 ## File Structure
+
 ```
 .
 ├── app.py            # Flask web application
-├── generator.py      # Resume parsing and cover letter generation
+├── generator.py      # Command-line cover letter generator
 ├── templates/        # HTML templates for web interface
 ├── static/           # CSS, JavaScript, and assets
 ├── requirements.txt  # Project dependencies
@@ -69,14 +71,17 @@ pip install -r requirements.txt
 ```
 
 ## Technologies Used
-- **Flask** - Web framework for handling requests
-- **pdfplumber** - Extract text from PDFs
-- **BeautifulSoup** - Parse and clean job postings from webpages
-- **Playwright** - Automate job posting extraction
-- **Ollama** - AI-powered cover letter generation
 
-## License
-This project is licensed under the MIT License. See `LICENSE` for details.
+- Python
+- Flask (for web interface)
+- BeautifulSoup (for parsing job posting sites)
+- PyPDF2 (for parsing resumes from PDFs)
+- Ollama API (for cover letter generation)
 
 ## Contributing
-Feel free to fork the repository and submit pull requests for improvements or bug fixes.
+
+Contributions are welcome! Please submit a pull request or open an issue if you have suggestions.
+
+## License
+
+This project is licensed under the MIT-0 License.
