@@ -75,10 +75,12 @@ The command-line tool will extract job descriptions from the provided URL or all
 ## Technologies Used
 
 - Python
-- Flask (for web interface)
 - BeautifulSoup (for parsing job posting sites)
-- PyPDF2 (for parsing resumes from PDFs)
-- Ollama API (for cover letter generation)
+- Ollama (for cover letter generation)
+- Flask (for web interface)
+- PDFPlumber (for parsing resumes from PDFs)
+- Playwright (for fetching job postings from URLs)
+
 
 ## Contributing
 
