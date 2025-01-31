@@ -1,0 +1,13 @@
+{% extends "app.html" %}
+
+{% block content %}
+    <h1>Welcome to the AI Cover Letter Generator</h1>
+	<h2>Saved Cover Letters</h2>
+	<ul>
+		{% for job in jobs %}
+			<li>
+				<strong>{{ job }}</strong><br>
+			</li>
+		{% endfor %}
+	</ul>
+{% endblock %}

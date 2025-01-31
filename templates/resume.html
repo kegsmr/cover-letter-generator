@@ -1,15 +1,39 @@
 {% extends "app.html" %}
 
 {% block content %}
-	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-	<script defer src="/static/js/markdown-editor.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script defer src="/static/js/markdown-editor.js"></script>
 
     <h1>Upload and Edit Your Resume</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="resume" accept=".pdf, .docx, .txt">
-        <button type="submit">Upload Resume</button>
-    </form>
+	
+    <form method="POST" enctype="multipart/form-data" style="max-width: 500px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+		<h3 style="text-align: center; margin-bottom: 20px;">Upload Your Resume</h3>
+	
+		<!-- File Input -->
+		<label for="resume" style="display: block; font-size: 16px; margin-bottom: 10px; color: #333;">Choose a file to upload:</label>
+		<input type="file" name="resume" accept=".pdf, .docx, .txt" id="resume" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; margin-bottom: 20px;">
+	
+		<!-- Submit Button -->
+		<button type="submit" style="width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">
+			Upload Resume
+		</button>
+	</form>
+	
 
-    <textarea id="markdown-input">{{ resume_content }}</textarea>
-    <div id="markdown-preview" class="preview"></div>
+	<br>
+
+    <div style="display: flex; gap: 10px;">
+        <!-- Left: Textarea (Editor) -->
+        <textarea id="markdown-input" style="flex: 1; min-height: 400px;">{{ resume }}</textarea>
+
+        <!-- Right: Preview -->
+        <div id="markdown-preview" class="preview" style="flex: 1; min-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
+    </div>
+
+    <br>
+
+    <div style="display: flex; gap: 10px;">
+        <button onclick="window.history.back();">Back</button>
+        <button onclick="window.location.href='{{ url_for('sample') }}';">Continue</button>
+    </div>
 {% endblock %}

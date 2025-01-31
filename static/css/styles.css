@@ -311,3 +311,13 @@ textarea:focus {
     border-color: #3498db;
     outline: none;
 }
+
+a {
+    color: blue;  /* Set the color of links to blue */
+    text-decoration: underline;  /* Optional: underline links */
+}
+
+a:hover {
+    color: darkblue;  /* Optional: change the color when hovering */
+    text-decoration: underline;
+}

@@ -1,6 +1,12 @@
 {% extends "app.html" %}
 
 {% block content %}
-    <h1>Provide a Writing Sample</h1>
+
+    <h1>Provide a Sample Cover Letter (optional)</h1>
     <textarea id="sample-input">{{ sample_content }}</textarea>
+
+	<div style="display: flex; gap: 10px;">
+        <button onclick="window.history.back();">Back</button>
+        <button onclick="window.location.href='{{ url_for('job') }}';">Continue</button>
+    </div>
 {% endblock %}

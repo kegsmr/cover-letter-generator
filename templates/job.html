@@ -1,10 +1,21 @@
 {% extends "app.html" %}
 
 {% block content %}
-	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-	<script defer src="/static/js/markdown-editor.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script defer src="/static/js/markdown-editor.js"></script>
 
     <h1>Paste and Edit Job Description</h1>
-    <textarea id="markdown-input">{{ job_description_content }}</textarea>
-    <div id="markdown-preview" class="preview"></div>
+
+    <div style="display: flex; gap: 20px;">
+        <!-- Editor section on the left -->
+        <textarea id="markdown-input" style="width: 48%; height: 400px; padding: 10px; font-family: 'Courier New', monospace; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; resize: vertical;">{{ job_description_content }}</textarea>
+
+        <!-- Preview section on the right -->
+        <div id="markdown-preview" style="width: 48%; height: 400px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;"></div>
+	</div>
+
+	<div style="display: flex; gap: 10px;">
+        <button onclick="window.history.back();">Back</button>
+        <button onclick="window.location.href='{{ url_for('letter') }}';">Continue</button>
+    </div>
 {% endblock %}

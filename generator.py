@@ -1,5 +1,4 @@
 import os
-import shutil
 from datetime import datetime
 
 import ollama as o
@@ -41,7 +40,7 @@ def main():
 				if i:
 					i = input("...")
 				else:
-					i = input("... (Press <CTRL+C> to end input) ")
+					i = input("... (Press <CTRL+C>) ")
 			except KeyboardInterrupt:
 				print()
 				break
