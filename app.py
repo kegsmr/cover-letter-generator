@@ -1,7 +1,7 @@
 import tempfile
 import os
 
-from flask import Flask, render_template, redirect, request, session
+from flask import Flask, render_template, redirect, request, session, url_for
 
 from generator import *
 
@@ -13,7 +13,7 @@ app.secret_key = os.urandom(24)
 
 @app.before_request
 def make_session_permanent():
-    session.permanent = True
+	session.permanent = True
 
 
 @app.after_request
@@ -23,32 +23,48 @@ def add_cors_headers(response):
 
 
 @app.errorhandler(404)
-def error_404(e):
-	return render_template('error_404.html', description=e.description), 404
+def not_found_error(error):
+    return render_template('error.html', error_message="Page not found"), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    return render_template('error.html', error_message="Internal server error, please try again later."), 500
 
 
 @app.route("/")
 def index():
-	return redirect("/resume")
+	return redirect("/home")
+
+
+@app.route("/home")
+def home():
+	return render_template("home.html")
+
+
+@app.route("/login")
+def login():
+	return render_template("login.html")
 
 
 @app.route("/resume")
-def resume_redirect():
-	if "resume" not in session.keys():
-		return redirect("/resume/upload")
-	else:
-		return redirect("/resume/edit")
+def resume():
+	return render_template("resume.html")
 
 
-@app.route("/resume/upload")
-def resume_upload():
-	return render_template("resume_upload.html")
+@app.route("/sample")
+def sample():
+	return render_template("sample.html")
 
 
-@app.route("/resume/edit")
-def resume_edit():
-	text = session.get("resume", "No resume text extracted.").replace("\n", "\\n")
-	return render_template("resume_edit.html", text=text)
+@app.route("/job")
+def job():
+	return render_template("job.html")
+
+
+@app.route("/letter")
+def letter():
+	return render_template("letter.html")
 
 
 @app.route("/api/resume/upload", methods=["POST"])

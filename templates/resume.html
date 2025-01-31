@@ -1,0 +1,15 @@
+{% extends "app.html" %}
+
+{% block content %}
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script defer src="/static/js/markdown-editor.js"></script>
+
+    <h1>Upload and Edit Your Resume</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="resume" accept=".pdf, .docx, .txt">
+        <button type="submit">Upload Resume</button>
+    </form>
+
+    <textarea id="markdown-input">{{ resume_content }}</textarea>
+    <div id="markdown-preview" class="preview"></div>
+{% endblock %}

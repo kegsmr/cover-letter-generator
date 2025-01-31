@@ -1,0 +1,22 @@
+{% extends "app.html" %}
+
+{% block content %}
+    <h1>Generated Cover Letter</h1>
+    <div class="generated-content">
+        <h2>Job Description:</h2>
+        <div class="preview">{{ job_description }}</div>
+
+        <h2>Your Resume:</h2>
+        <div class="preview">{{ resume }}</div>
+    </div>
+
+    <h2>Edit the Cover Letter:</h2>
+    <textarea id="letter-edit-input">{{ cover_letter }}</textarea>
+    <button id="regen-btn" onclick="regenerateCoverLetter()">Regenerate</button>
+
+    <div id="feedback-popup" class="popup">
+        <h3>Provide Feedback</h3>
+        <textarea id="feedback-input"></textarea>
+        <button onclick="submitFeedback()">Submit Feedback</button>
+    </div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "app.html" %}
+
+{% block content %}
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script defer src="/static/js/markdown-editor.js"></script>
+
+    <h1>Paste and Edit Job Description</h1>
+    <textarea id="markdown-input">{{ job_description_content }}</textarea>
+    <div id="markdown-preview" class="preview"></div>
+{% endblock %}
