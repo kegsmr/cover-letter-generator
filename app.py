@@ -57,9 +57,9 @@ def cmd():
 		while True:
 			try:
 				if i:
-					i = input()
+					i = input("...")
 				else:
-					i = input("(Press <CTRL+C> to end) ")
+					i = input("... (Press <CTRL+C> to end input) ")
 			except KeyboardInterrupt:
 				print()
 				break
