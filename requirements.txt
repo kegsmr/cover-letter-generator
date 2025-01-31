@@ -1,5 +1,5 @@
-flask
-pdfplumber
 bs4
-playwright
+flask
 ollama
+pdfplumber
+playwright
