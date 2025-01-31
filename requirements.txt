@@ -2,3 +2,4 @@ flask
 pdfplumber
 bs4
 playwright
+ollama
