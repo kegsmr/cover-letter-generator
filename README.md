@@ -4,6 +4,8 @@
 
 This application generates tailored cover letters based on job descriptions. It extracts relevant information from a user's resume and refines it according to the job posting.
 
+**This project is a work-in-progress! The web app is not functional yet, but you can use the command-line utility in the meantime.**
+
 ## Features
 
 - Extracts text from PDF resumes
@@ -73,10 +75,12 @@ The command-line tool will extract job descriptions from the provided URL or all
 ## Technologies Used
 
 - Python
-- Flask (for web interface)
 - BeautifulSoup (for parsing job posting sites)
-- PyPDF2 (for parsing resumes from PDFs)
-- Ollama API (for cover letter generation)
+- Ollama (for cover letter generation)
+- Flask (for web interface)
+- PDFPlumber (for parsing resumes from PDFs)
+- Playwright (for fetching job postings from URLs)
+
 
 ## Contributing
 
