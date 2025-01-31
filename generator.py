@@ -1,5 +1,6 @@
 import os
 import shutil
+from datetime import datetime
 
 import ollama as o
 import pdfplumber
@@ -18,21 +19,21 @@ ollama = o.Client()
 
 def main():
 
-	SAVED_DIRECTORY = "saved"
-	os.makedirs(SAVED_DIRECTORY, exist_ok=True)
+	SAVE_PATH = "saved"
+	os.makedirs(SAVE_PATH, exist_ok=True)
 
 	try:
 		if not os.path.exists("resume.md"):
-			_resume = parse_pdf("resume.pdf")
-			open("resume.md", "w", encoding="utf-8").write(_resume)
+			resume = parse_pdf("resume.pdf")
+			open("resume.md", "w", encoding="utf-8").write(resume)
 		else:
-			_resume = open("resume.md", encoding="utf-8").read()
+			resume = open("resume.md", encoding="utf-8").read()
 	except Exception as e:
 		raise Exception("Please save your resume with the filename `resume.pdf`.") from e
 
-	_input = input("Job URL/description: ")
-	if _input.startswith("http://") or _input.startswith("https://"):
-		_input = get_job_posting(_input)
+	job_posting = input("Job URL/description: ")
+	if job_posting.startswith("http://") or job_posting.startswith("https://"):
+		job_posting = get_job_posting(job_posting)
 	else:
 		i = True
 		while True:
@@ -44,33 +45,30 @@ def main():
 			except KeyboardInterrupt:
 				print()
 				break
-			_input += f"\n{i}"
-		_input = text_to_markdown(_input)
+			job_posting += f"\n{i}"
+		job_posting = text_to_markdown(job_posting)
 
 	print("\033[34m")
-	[print(line) for line in _input.splitlines()]
+	[print(line) for line in job_posting.splitlines()]
 	print("\033[0m")
 
-	open("input.md", "w", encoding="utf-8").write(_input)
+	open("job.md", "w", encoding="utf-8").write(job_posting)
 
 	examples = []
-	n = 1
-	while os.path.exists(os.path.join(SAVED_DIRECTORY, f"input_{n}.md")) \
-		and os.path.exists(os.path.join(SAVED_DIRECTORY, f"output_{n}.md")):
-		examples += [(
-			_resume,
-			open(os.path.join(SAVED_DIRECTORY, f"input_{n}.md"), encoding="utf-8").read(),
-			open(os.path.join(SAVED_DIRECTORY, f"output_{n}.md"), encoding="utf-8").read()
-		)]
-		n += 1
+	for directory in os.listdir(SAVE_PATH):
+		path = os.path.join(SAVE_PATH, directory)
+		if os.path.isdir(path):
+			# print(f"Loading `{path}`...")
+			examples += [load(path)]
+	print(examples)
 
 	feedback = []
 	while True:
-		_output = generate(examples=examples, resume=_resume, job_posting=_input, comments=feedback)
-		open("output.md", "w", encoding="utf-8") \
-			.write(_output)
+		cover_letter = generate(examples=examples, resume=resume, job_posting=job_posting, comments=feedback)
+		open("letter.md", "w", encoding="utf-8") \
+			.write(cover_letter)
 		print("\033[32m")
-		[print(line) for line in _output.splitlines()]
+		[print(line) for line in cover_letter.splitlines()]
 		print("\033[0m")
 		try:
 			f = input("Feedback: ")
@@ -80,15 +78,8 @@ def main():
 			feedback += [f]
 
 	if input("\nSave? (y/n): ").lower() == "y":
-
-		n = 1
-		while os.path.exists(os.path.join(SAVED_DIRECTORY, f"input_{n}.md")) \
-			and os.path.exists(os.path.join(SAVED_DIRECTORY, f"output_{n}.md")):
-			n += 1
-
-		shutil.copy("input.md", os.path.join(SAVED_DIRECTORY, f"input_{n}.md"))
-		shutil.copy("output.md", os.path.join(SAVED_DIRECTORY, f"output_{n}.md"))
-		print(f"Saved input/output {n} to the `{SAVED_DIRECTORY}` directory.")
+		path = save(SAVE_PATH, resume, job_posting, cover_letter)
+		print(f"Saved to `{path}`.")
 
 
 def generate(examples=[], resume="", job_posting="", comments=[]):
@@ -344,6 +335,84 @@ def text_to_markdown(text: str) -> str:
 		reply = reply.replace("markdown", "", 1)
 
 	return reply.strip()
+
+
+def pick_job_title(job_posting: str) -> str:
+
+	messages = [
+		{
+			"role": "user",
+			"content": "Please choose a title for this job posting.\n\n" \
+				"```\n" \
+				f"{job_posting}\n" \
+				"```\n\n" \
+				"Format the title as `<job title> at <company name>`.\n\n" \
+				"Reply ONLY with the job title, no commentary!"
+		}
+	]
+
+	reply = ollama.chat(model=BASE_MODEL, messages=messages) \
+		.message \
+		.content \
+
+	reply = reply.split("\n")[0]
+
+	return reply.strip()
+
+
+def filter_non_alpha_numeric(text: str) -> str:
+
+	import re
+
+	return " ".join(re.sub('[^0-9a-zA-Z ]+', " ", text).split())
+
+
+def sanitize_directory_name(text: str) -> str:
+
+	text = text.replace("..", "")
+	
+	for character in ["/", "\\"]:
+		text = text.replace(character, "")
+
+	text = text.replace("..", "")
+
+	text = text.strip()
+
+	return text
+
+
+def save(path, resume, job_posting, cover_letter) -> str:
+
+	path = os.path.join(path, datetime.now().strftime("%Y%m%d%H%M%S"))
+	
+	os.makedirs(path, exist_ok=True)
+
+	resume_path = os.path.join(path, "resume.md")
+	job_path = os.path.join(path, "job.md")
+	letter_path = os.path.join(path, "letter.md")
+	title_path = os.path.join(path, "title.md")
+
+	for filename, data in [(resume_path, resume), (job_path, job_posting), (letter_path, cover_letter), (title_path, pick_job_title(job_posting))]:
+		with open(filename, "w", encoding="utf-8") as file:
+			file.write(data)
+
+	return path
+
+
+def load(path) -> tuple:
+
+	paths = [
+		os.path.join(path, "resume.md"),
+		os.path.join(path, "job.md"),
+		os.path.join(path, "letter.md")
+	]
+
+	data = []
+
+	for path in paths:
+		data.append(open(path, encoding="utf-8").read())
+
+	return tuple(data)
 
 
 if __name__ == "__main__":
