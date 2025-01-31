@@ -2,6 +2,7 @@ import os
 import shutil
 
 import ollama as o
+import pdfplumber
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
@@ -16,6 +17,8 @@ ollama = o.Client()
 
 
 def main():
+
+	SAVED_DIRECTORY = "saved"
 
 	try:
 		if not os.path.exists("resume.md"):
@@ -51,12 +54,12 @@ def main():
 
 	examples = []
 	n = 1
-	while os.path.exists(f"input_{n}.md") \
-		and os.path.exists(f"output_{n}.md"):
+	while os.path.exists(os.path.join(SAVED_DIRECTORY, f"input_{n}.md")) \
+		and os.path.exists(os.path.join(SAVED_DIRECTORY, f"output_{n}.md")):
 		examples += [(
 			_resume,
-			open(f"input_{n}.md", encoding="utf-8").read(),
-			open(f"output_{n}.md", encoding="utf-8").read()
+			open(os.path.join(SAVED_DIRECTORY, f"input_{n}.md"), encoding="utf-8").read(),
+			open(os.path.join(SAVED_DIRECTORY, f"output_{n}.md"), encoding="utf-8").read()
 		)]
 		n += 1
 
@@ -78,12 +81,12 @@ def main():
 	if input("\nSave? (y/n): ").lower() == "y":
 
 		n = 1
-		while os.path.exists(f"input_{n}.md") \
-			and os.path.exists(f"output_{n}.md"):
+		while os.path.exists(os.path.join(SAVED_DIRECTORY, f"input_{n}.md")) \
+			and os.path.exists(os.path.join(SAVED_DIRECTORY, f"output_{n}.md")):
 			n += 1
 
-		shutil.copy("input.md", f"input_{n}.md")
-		shutil.copy("output.md", f"output_{n}.md")
+		shutil.copy("input.md", os.path.join(SAVED_DIRECTORY, f"input_{n}.md"))
+		shutil.copy("output.md", os.path.join(SAVED_DIRECTORY, f"output_{n}.md"))
 
 
 def generate(examples=[], resume="", job_posting="", comments=[]):
@@ -334,8 +337,11 @@ def text_to_markdown(text: str) -> str:
 			reply = reply.split("```")[1]
 		except Exception as e:
 			print(f"Error: {e}")
+	
+	if reply.startswith("markdown"):
+		reply = reply.replace("markdown", "", 1)
 
-	return reply
+	return reply.strip()
 
 
 if __name__ == "__main__":

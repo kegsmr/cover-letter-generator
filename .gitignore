@@ -1,6 +1,7 @@
 __pycache__
 
-input*.md
-output*.md
+saved
+input.md
+output.md
 resume.md
 resume.pdf
