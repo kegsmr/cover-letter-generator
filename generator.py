@@ -346,7 +346,7 @@ def pick_job_title(job_posting: str) -> str:
 				"```\n" \
 				f"{job_posting}\n" \
 				"```\n\n" \
-				"Format the title as `<job title> at <company name>`.\n\n" \
+				"Format the title as `<job title> at <company name>`. No special characters!\n\n" \
 				"Reply ONLY with the job title, no commentary!"
 		}
 	]
@@ -357,7 +357,7 @@ def pick_job_title(job_posting: str) -> str:
 
 	reply = reply.split("\n")[0]
 
-	return reply.strip()
+	return filter_non_alpha_numeric(reply.strip())
 
 
 def filter_non_alpha_numeric(text: str) -> str:
