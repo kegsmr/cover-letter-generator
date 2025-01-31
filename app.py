@@ -64,7 +64,10 @@ def job():
 
 @app.route("/letter")
 def letter():
-	return render_template("letter.html")
+	job = open("input.md", "r", encoding="utf-8").read().replace("\n", "\\n")
+	resume = open("resume.md", "r", encoding="utf-8").read().replace("\n", "\\n")
+	letter = open("output.md", "r", encoding="utf-8").read()
+	return render_template("letter.html", job=job, resume=resume, letter=letter)
 
 
 @app.route("/api/resume/upload", methods=["POST"])

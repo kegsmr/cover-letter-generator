@@ -1,22 +1,45 @@
 {% extends "app.html" %}
 
 {% block content %}
-    <h1>Generated Cover Letter</h1>
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+	<h1>Generated Cover Letter</h1>
     <div class="generated-content">
-        <h2>Job Description:</h2>
-        <div class="preview">{{ job_description }}</div>
+        <div class="content-item">
+            <h2>Job Description:</h2>
+            <div class="preview" id="job-description"></div>
+        </div>
 
-        <h2>Your Resume:</h2>
-        <div class="preview">{{ resume }}</div>
+        <div class="content-item">
+            <h2>Your Resume:</h2>
+            <div class="preview" id="resume"></div>
+        </div>
+
+        <div class="content-item">
+            <h2>Your Cover Letter:</h2>
+            <textarea id="letter-edit-input" oninput="resizeTextarea(this)">{{ letter }}</textarea>
+        </div>
     </div>
 
-    <h2>Edit the Cover Letter:</h2>
-    <textarea id="letter-edit-input">{{ cover_letter }}</textarea>
-    <button id="regen-btn" onclick="regenerateCoverLetter()">Regenerate</button>
-
+    <div class="button-container">
+        <button id="regen-btn" onclick="regenerateCoverLetter()">Regenerate</button>
+        <button id="save-btn" onclick="regenerateCoverLetter()">Save</button>
+    </div>
+    
     <div id="feedback-popup" class="popup">
         <h3>Provide Feedback</h3>
         <textarea id="feedback-input"></textarea>
         <button onclick="submitFeedback()">Submit Feedback</button>
     </div>
+
+    <script>
+        // Convert Markdown to HTML using marked.js
+        document.getElementById('job-description').innerHTML = marked.parse('{{ job }}');
+        document.getElementById('resume').innerHTML = marked.parse('{{ resume }}');
+        
+        function resizeTextarea(element) {
+            element.style.height = 'auto';
+            element.style.height = (element.scrollHeight) + 'px';
+        }
+    </script>
 {% endblock %}
