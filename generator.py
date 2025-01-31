@@ -19,6 +19,7 @@ ollama = o.Client()
 def main():
 
 	SAVED_DIRECTORY = "saved"
+	os.makedirs(SAVED_DIRECTORY, exist_ok=True)
 
 	try:
 		if not os.path.exists("resume.md"):
