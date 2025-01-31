@@ -4,7 +4,7 @@
 
 This application generates tailored cover letters based on job descriptions. It extracts relevant information from a user's resume and refines it according to the job posting.
 
-**Note:** This project is a work-in-progress! The web app is not functional yet, but you can use the commandline utility.
+**Note:** This project is a work-in-progress! The web app is not functional yet, but you can use the command-line utility.
 
 ## Features
 
