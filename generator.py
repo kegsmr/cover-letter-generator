@@ -88,6 +88,7 @@ def main():
 
 		shutil.copy("input.md", os.path.join(SAVED_DIRECTORY, f"input_{n}.md"))
 		shutil.copy("output.md", os.path.join(SAVED_DIRECTORY, f"output_{n}.md"))
+		print(f"Saved input/output {n} to the `{SAVED_DIRECTORY}` directory.")
 
 
 def generate(examples=[], resume="", job_posting="", comments=[]):
