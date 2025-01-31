@@ -60,7 +60,7 @@ def main():
 		if os.path.isdir(path):
 			# print(f"Loading `{path}`...")
 			examples += [load(path)]
-	print(examples)
+	# print(examples)
 
 	feedback = []
 	while True:
