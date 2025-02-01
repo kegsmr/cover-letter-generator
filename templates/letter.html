@@ -4,41 +4,41 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script defer src="/static/js/markdown-editor.js"></script>
 
-    <h1>Generated Cover Letter</h1>
-    <div class="generated-content">
-        <div class="content-item">
-            <!-- Added inline CSS to truncate the title if too long -->
-            <h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">{{ title }}:</h2>
+    <h1>{{ title }}</h1>
+    
+    <!-- Cover Letter Section -->
+    <div class="content-item">
+        <h2>Your Cover Letter:</h2>
+        <textarea id="letter-edit-input" style="min-height: 550px; margin-bottom: 5px;" oninput="resizeTextarea(this)">{{ letter }}</textarea>
+    </div>
+
+    <!-- Feedback Form (Minimized Gap) -->
+    <div class="button-container" style="display: flex; gap: 8px; align-items: center; margin-top: 0;">
+        <input type="text" id="inline-feedback" placeholder="Enter feedback here" style="flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+        <button id="regen-btn" style="max-width: 150px; padding: 6px 10px;" onclick="regenerateCoverLetter()">Regenerate</button>
+    </div>
+
+    <!-- Job Posting and Resume Side by Side -->
+    <div class="generated-content" style="display: flex; gap: 10px; margin-top: 15px;">
+        <div class="content-item" style="flex: 1;">
+            <h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">Job Description:</h2>
             <div class="preview" id="job-description" style="min-height: 650px;">{{ job }}</div>
         </div>
 
-        <div class="content-item">
+        <div class="content-item" style="flex: 1;">
             <h2>Your Resume:</h2>
             <div class="preview" id="resume" style="min-height: 650px;">{{ resume }}</div>
         </div>
-
-        <div class="content-item">
-            <h2>Your Cover Letter:</h2>
-            <textarea id="letter-edit-input" style="min-height: 650px;" oninput="resizeTextarea(this)">{{ letter }}</textarea>
-        </div>
-    </div>
-
-    <!-- Inline feedback row: Feedback input and Regenerate button -->
-    <div class="button-container" style="display: flex; gap: 10px; align-items: center;">
-        <input type="text" id="inline-feedback" placeholder="Enter feedback here" style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-        <button id="regen-btn" style="max-width: 150px;" onclick="regenerateCoverLetter()">Regenerate</button>
     </div>
 
     <br>
 
-    <div style="display: flex; gap: 10px;">
+    <div class="footer-buttons">
         <button onclick="window.location.href='{{ url_for('job') }}';">Back</button>
-        <!-- Save & Exit button now posts the letter content to /letter -->
         <button id="save-btn" onclick="saveAndExit()">Save & Exit</button>
     </div>
 
     <script>
-        // Convert Markdown to HTML using marked.js
         document.getElementById('job-description').innerHTML = marked.parse(`{{ job | safe }}`);
         document.getElementById('resume').innerHTML = marked.parse(`{{ resume | safe }}`);
         
@@ -47,7 +47,6 @@
             element.style.height = (element.scrollHeight) + 'px';
         }
 
-        // Regenerate the cover letter, optionally sending feedback
         function regenerateCoverLetter() {
             const feedback = document.getElementById("inline-feedback").value;
             const formData = new FormData();
@@ -73,7 +72,6 @@
             });
         }
 
-        // Save the current letter and exit by sending a POST to /letter
         function saveAndExit() {
             const letterContent = document.getElementById("letter-edit-input").value;
             const formData = new FormData();

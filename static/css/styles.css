@@ -321,3 +321,46 @@ a:hover {
     color: darkblue;  /* Optional: change the color when hovering */
     text-decoration: underline;
 }
+
+/* Sticky footer container */
+.footer-buttons {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 10px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Buttons inside the footer */
+.footer-buttons button {
+    padding: 8px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+/* Style for Back button */
+.footer-buttons button:first-child {
+    background: #f0f0f0;
+}
+
+.footer-buttons button:first-child:hover {
+    background: #e0e0e0;
+}
+
+/* Style for Save & Exit button */
+.footer-buttons button:last-child {
+    background: #007bff;
+    color: white;
+}
+
+.footer-buttons button:last-child:hover {
+    background: #0056b3;
+}
