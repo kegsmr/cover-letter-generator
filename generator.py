@@ -18,15 +18,19 @@ ollama = o.Client()
 
 def main():
 
-	SAVE_PATH = "saved"
+	DATA_PATH = os.path.join("database", "local")
+	RESUME_PATH = os.path.join(DATA_PATH, "resume.md")
+	JOB_PATH = os.path.join(DATA_PATH, "job.md")
+	LETTER_PATH = os.path.join(DATA_PATH, "letter.md")
+	SAVE_PATH = os.path.join(DATA_PATH, "saved")
 	os.makedirs(SAVE_PATH, exist_ok=True)
 
 	try:
-		if not os.path.exists("resume.md"):
+		if not os.path.exists(RESUME_PATH):
 			resume = parse_pdf("resume.pdf")
-			open("resume.md", "w", encoding="utf-8").write(resume)
+			open(RESUME_PATH, "w", encoding="utf-8").write(resume)
 		else:
-			resume = open("resume.md", encoding="utf-8").read()
+			resume = open(RESUME_PATH, encoding="utf-8").read()
 	except Exception as e:
 		raise Exception("Please save your resume with the filename `resume.pdf`.") from e
 
@@ -51,7 +55,7 @@ def main():
 	[print(line) for line in job_posting.splitlines()]
 	print("\033[0m")
 
-	open("job.md", "w", encoding="utf-8").write(job_posting)
+	open(JOB_PATH, "w", encoding="utf-8").write(job_posting)
 
 	examples = []
 	for directory in os.listdir(SAVE_PATH):
@@ -64,7 +68,7 @@ def main():
 	feedback = []
 	while True:
 		cover_letter = generate(examples=examples, resume=resume, job_posting=job_posting, comments=feedback)
-		open("letter.md", "w", encoding="utf-8") \
+		open(LETTER_PATH, "w", encoding="utf-8") \
 			.write(cover_letter)
 		print("\033[32m")
 		[print(line) for line in cover_letter.splitlines()]
