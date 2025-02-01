@@ -9,8 +9,11 @@
 </head>
 <body>
     <nav>
-        <!-- <button id="back-btn" onclick="navigate(-1)">&#8592; Back</button>
-        <button id="forward-btn" onclick="navigate(1)">Forward &#8594;</button> -->
+        <button onclick="window.location.href='{{ url_for('dashboard') }}';">Home</button>
+		<button onclick="window.location.href='{{ url_for('resume') }}';">Resume</button>
+		<button onclick="window.location.href='{{ url_for('sample') }}';">Writing Sample</button>
+		<button onclick="window.location.href='{{ url_for('job') }}';">Job Posting</button>
+		<button onclick="window.location.href='{{ url_for('letter') }}';">Cover Letter</button>
     </nav>
     <main>
         <section id="content">

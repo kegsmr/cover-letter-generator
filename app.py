@@ -305,10 +305,15 @@ def letter():
 
 	if request.method == "GET":
 
+		title = read_user_file(user_id, "title.md")
+
+		if not title:
+			title = "Job Posting"
+
 		options = {
 			"job": read_user_file(user_id, "job.md").replace("\n", "\\n"),
 			"resume": read_user_file(user_id, "resume.md").replace("\n", "\\n"),
-			"title": read_user_file(user_id, "title.md"),
+			"title": title,
 			"letter": read_user_file(user_id, "letter.md")
 		}
 		
@@ -354,11 +359,15 @@ def letter_generate():
 	job = read_user_file(user_id, "job.md")
 	sample = read_user_file(user_id, "sample.md")
 
-	examples = [(resume, "No job description provided.", sample)]
+	examples = []
+	if sample:
+		examples += [(resume, "No job description provided.", sample)]
 	save_path = os.path.join(database_path, user_id, "saved")
 	if os.path.exists(save_path):
 		for directory in os.listdir(save_path):
 			examples += [load(os.path.join(save_path, directory))]
+
+	# print(examples)
 	
 	write_user_file(pick_job_title(job), user_id, "title.md")
 	write_user_file(generate(examples, resume, job, comments=session["feedback"]), user_id, "letter.md")
