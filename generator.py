@@ -345,7 +345,7 @@ def pick_job_title(job_posting: str) -> str:
 				"```\n" \
 				f"{job_posting}\n" \
 				"```\n\n" \
-				"Format the title as `<job title> at <company name>`. No special characters!\n\n" \
+				"Format the title as `<job title> at <company name>`.\n\n" \
 				"Reply ONLY with the job title, no commentary!"
 		}
 	]
@@ -356,7 +356,7 @@ def pick_job_title(job_posting: str) -> str:
 
 	reply = reply.split("\n")[0]
 
-	return filter_non_alpha_numeric(reply.strip())
+	return reply.strip()
 
 
 def filter_non_alpha_numeric(text: str) -> str:
@@ -380,9 +380,12 @@ def sanitize_directory_name(text: str) -> str:
 	return text
 
 
-def save(path, resume, job_posting, cover_letter) -> str:
+def save(path, resume, job_posting, cover_letter, title="", save_id="") -> str:
 
-	path = os.path.join(path, datetime.now().strftime("%Y%m%d%H%M%S"))
+	if not save_id:
+		save_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+	path = os.path.join(path, save_id)
 	
 	os.makedirs(path, exist_ok=True)
 
@@ -391,7 +394,7 @@ def save(path, resume, job_posting, cover_letter) -> str:
 	letter_path = os.path.join(path, "letter.md")
 	title_path = os.path.join(path, "title.md")
 
-	for filename, data in [(resume_path, resume), (job_path, job_posting), (letter_path, cover_letter), (title_path, pick_job_title(job_posting))]:
+	for filename, data in [(resume_path, resume), (job_path, job_posting), (letter_path, cover_letter), (title_path, title if title else pick_job_title(job_posting))]:
 		with open(filename, "w", encoding="utf-8") as file:
 			file.write(data)
 

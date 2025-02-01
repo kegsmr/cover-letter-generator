@@ -1,13 +1,30 @@
 {% extends "app.html" %}
 
 {% block content %}
-    <h1>Welcome to the AI Cover Letter Generator</h1>
-	<h2>Saved Cover Letters</h2>
-	<ul>
-		{% for job in jobs %}
+	<div style="max-width: 1200px; margin-left: auto; margin-right: auto;">
+		<h1>Welcome to the AI Cover Letter Generator</h1>
+		<p>Welcome back! Your AI-powered cover letter assistant is here to help streamline your job applications. Quickly access your saved cover letters, update your resume, or generate a new tailored cover letter with just a few clicks. Let’s make your job search more efficient and effective!</p>
+		<br>
+		<button onclick="window.location.href='{{ url_for('job_new') }}';">New Cover Letter</button>
+		<br>
+		<br>
+		<h2>Your Profile</h2>
+		<ul>
 			<li>
-				<strong>{{ job }}</strong><br>
+				<a href="{{ url_for('resume') }}">Edit Resume</a>
 			</li>
-		{% endfor %}
-	</ul>
+			<li>
+				<a href="{{ url_for('sample') }}">Edit Writing Sample</a>
+			</li>
+		</ul>
+		<br>
+		<h2>Your Cover Letters</h2>
+		<ul>
+			{% for id, name in jobs %}
+				<li>
+					<a href="/letter/load/{{ id }}">{{ name }}</a>
+				</li>
+			{% endfor %}
+		</ul>
+	</div>
 {% endblock %}

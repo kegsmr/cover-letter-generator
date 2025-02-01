@@ -1,17 +1,18 @@
 {% extends "app.html" %}
 
 {% block content %}
-    <h1>Welcome to the AI Cover Letter Generator</h1>
-
-    <p>Thank you for using the AI Cover Letter Generator! This is a free and open-source project designed to help you generate tailored cover letters quickly and easily. The tool extracts relevant information from your resume and refines it according to job descriptions, creating personalized, high-quality cover letters for your job applications.</p>
-	<br>
-    <p>To get started, please continue to the next step and upload your resume. This will allow the app to extract the necessary details from your resume and tailor the cover letter to each job posting you apply for.</p>
-	<br>
-    <p>Your previously generated cover letters will be saved and used to personalize future outputs, ensuring that your cover letters evolve over time based on your past applications.</p>
-	<br>
-    <p>Once you've uploaded your resume, the app will guide you through the next steps to generate your first cover letter!</p>
-	<br>
-	<p>For more information, see the <a href="https://github.com/kegsmr/cover-letter-generator", target="_blank">GitHub repository</a>.</p>
-	<br>
-	<button onclick="window.location.href='{{ url_for('resume') }}';">Get Started</button>
+	<div style="max-width: 1200px; margin-left: auto; margin-right: auto;">
+		<h1>Welcome to the AI Cover Letter Generator</h1>
+		<p>Thank you for using the AI Cover Letter Generator! This is a free and open-source project designed to help you generate tailored cover letters quickly and easily. The tool extracts relevant information from your resume and refines it according to job descriptions, creating personalized, high-quality cover letters for your job applications.</p>
+		<br>
+		<p>To get started, please continue to the next step and upload your resume. This will allow the app to extract the necessary details from your resume and tailor the cover letter to each job posting you apply for.</p>
+		<br>
+		<p>Your previously generated cover letters will be saved and used to personalize future outputs, ensuring that your cover letters evolve over time based on your past applications.</p>
+		<br>
+		<p>Once you've uploaded your resume, the app will guide you through the next steps to generate your first cover letter!</p>
+		<br>
+		<p>For more information, see the <a href="https://github.com/kegsmr/cover-letter-generator", target="_blank">GitHub repository</a>.</p>
+		<br>
+		<button onclick="window.location.href='{{ url_for('resume') }}';">Get Started</button>
+	</div>
 {% endblock %}

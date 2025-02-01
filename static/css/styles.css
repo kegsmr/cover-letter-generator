@@ -58,7 +58,7 @@ nav button {
 /* Main Container Styles */
 main {
     padding: 40px 20px;
-    max-width: 1200px;
+    /* max-width: 1200px; */
     margin: 0 auto;
 }
 
@@ -213,7 +213,7 @@ textarea:focus {
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    height: 500px; /* Fixed height */
+    /*height: 500px; /* Fixed height */
     overflow-y: auto; /* Enable vertical scrollbar */
 }
 
@@ -297,7 +297,7 @@ button:disabled {
 
 textarea {
     width: 100%;
-    min-height: 700px; /* Minimum height */
+    /* min-height: 560px; /* Minimum height */
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 8px;

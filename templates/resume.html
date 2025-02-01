@@ -5,35 +5,51 @@
     <script defer src="/static/js/markdown-editor.js"></script>
 
     <h1>Upload and Edit Your Resume</h1>
-	
-    <form method="POST" enctype="multipart/form-data" style="max-width: 500px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-		<h3 style="text-align: center; margin-bottom: 20px;">Upload Your Resume</h3>
-	
-		<!-- File Input -->
-		<label for="resume" style="display: block; font-size: 16px; margin-bottom: 10px; color: #333;">Choose a file to upload:</label>
-		<input type="file" name="resume" accept=".pdf, .docx, .txt" id="resume" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; margin-bottom: 20px;">
-	
-		<!-- Submit Button -->
-		<button type="submit" style="width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">
-			Upload Resume
-		</button>
-	</form>
-	
 
-	<br>
+    <div id="content">
 
-    <div style="display: flex; gap: 10px;">
-        <!-- Left: Textarea (Editor) -->
-        <textarea id="markdown-input" style="flex: 1; min-height: 400px;">{{ resume }}</textarea>
+        <form id="resume-form" method="POST" enctype="multipart/form-data" style="margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 10px;">
+            <input type="file" name="resume" accept=".pdf, .docx, .txt" id="resume" style="flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
 
-        <!-- Right: Preview -->
-        <div id="markdown-preview" class="preview" style="flex: 1; min-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
+            <!-- Hidden input to store the content of the textarea -->
+            <input type="hidden" name="resume_content" id="resume_content">
+
+            <!-- Submit Button for Upload -->
+            <button onclick="ShowLoadingOverlay('content')" type="submit" style="max-width:100px; padding: 12px 20px; background-color: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">
+                Upload
+            </button>
+        </form>
+
+        <br>
+
+        <div style="display: flex; gap: 10px;">
+            <!-- Left: Textarea (Editor) -->
+            <textarea id="markdown-input" style="flex: 1; min-height: 580px;">{{ resume }}</textarea>
+
+            <!-- Right: Preview -->
+            <div id="markdown-preview" class="preview" style="flex: 1; min-height: 580px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
+        </div>
+
     </div>
 
     <br>
 
     <div style="display: flex; gap: 10px;">
-        <button onclick="window.history.back();">Back</button>
-        <button onclick="window.location.href='{{ url_for('sample') }}';">Continue</button>
+        <button onclick="window.location.href='{{ url_for('dashboard') }}';">Back</button>
+        <button onclick="submitFormAndContinue(event)">Continue</button>
     </div>
+
+    <script>
+        // Function to update hidden input with the content of the textarea and submit form
+        function submitFormAndContinue(event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            // Update the hidden input with the content of the textarea
+            const textareaContent = document.getElementById("markdown-input").value;
+            document.getElementById("resume_content").value = textareaContent;
+            
+            // Now submit the form
+            document.getElementById("resume-form").submit();
+        }
+    </script>
 {% endblock %}

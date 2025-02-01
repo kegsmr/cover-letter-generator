@@ -4,6 +4,7 @@ import json
 from datetime import timedelta
 import time 
 import random
+import re
 
 from flask import Flask, render_template, redirect, request, session, url_for
 from authlib.integrations.flask_client import OAuth
@@ -83,6 +84,25 @@ def get_user_file(user_id, path="", mode="r", encoding="utf-8"):
 		return None
 	
 
+def read_user_file(user_id, path="", fix_spacing=True, **kwargs):
+	file = get_user_file(user_id, path, **kwargs)
+	if file:
+		data = file.read()
+		if fix_spacing:
+			data = re.sub(r'\n{3,}', '\n\n', data).strip()
+		return data
+	else:
+		return ""
+
+
+def write_user_file(data, user_id, path="", mode="w", encoding="utf-8"):
+	user_path = os.path.join(database_path, user_id)
+	if path:
+		user_path = os.path.join(user_path, path)
+	with open(user_path, mode, encoding=encoding) as user_file:
+		user_file.write(data)
+
+
 def get_user_jobs(user_id):
 	saved_path = get_user_path(user_id, "saved")
 	if saved_path:
@@ -90,8 +110,11 @@ def get_user_jobs(user_id):
 		for directory in os.listdir(saved_path):
 			title_path = os.path.join(saved_path, directory, "title.md")
 			if os.path.exists(title_path):
-				jobs.insert(0, open(title_path, encoding="utf-8").read())
-		return jobs
+				jobs.insert(0, (directory, open(title_path, encoding="utf-8").read()))
+		if len(jobs) > 0:
+			return jobs
+		else:
+			return None
 	else:
 		return None
 
@@ -109,12 +132,12 @@ def add_cors_headers(response):
 
 @app.errorhandler(404)
 def not_found_error(error):
-    return render_template('error.html', error_message="Page not found"), 404
+	return render_template('error.html', error_message="Page not found"), 404
 
 
 @app.errorhandler(500)
 def internal_server_error(error):
-    return render_template('error.html', error_message="Internal server error, please try again later."), 500
+	return render_template('error.html', error_message="Internal server error, please try again later."), 500
 
 
 @app.route("/")
@@ -139,103 +162,228 @@ def dashboard():
 	if jobs:
 		return render_template("dashboard.html", jobs=jobs)
 	else:
-		return redirect("/")
+		return redirect("welcome")
 
 # @app.route("/login")
 # def login():
 # 	return render_template("login.html")
 
 
-@app.route("/resume")
+@app.route("/resume", methods=["GET", "POST"])
 def resume():
-	resume_file = get_user_file(get_user_id(session), "resume.md")
-	if resume_file:
-		resume = resume_file.read()
+
+	user_id = get_user_id(session)
+
+	if request.method == "GET":
+
+		# Get the user's resume text (if it exists)
+		r = read_user_file(user_id, "resume.md")
+		return render_template("resume.html", resume=r)
+	
 	else:
-		resume = ""
-	return render_template("resume.html", resume=resume)
+
+		# Handling the file upload
+		if "resume" in request.files and request.files["resume"].filename != "":
+
+			upload = request.files["resume"]
+
+			# Error if no file selected
+			if upload.filename == "":
+				return {"error": "No selected file"}, 400
+
+			# Error if file extension is not supported
+			if not upload.filename.endswith(".pdf"):
+				return {"error": "Only PDF files are supported"}, 400
+
+			with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as file:
+				# Write the uploaded file to a temporary file
+				file.write(upload.read())
+				file.flush()
+
+				# Get the filename of the temporary file
+				filename = file.name
+
+			# Extract the text from the temporary file
+			resume = parse_pdf(filename)
+
+			# Save extracted text
+			write_user_file(resume, user_id, path="resume.md")
+
+			# Delete the temporary file
+			os.remove(filename)
+
+			# After processing the file, render with the resume text
+			return render_template("resume.html", resume=resume)
+		
+		# Handling the textarea content submission
+		if "resume_content" in request.form:
+
+			resume_content = request.form["resume_content"]
+
+			# Save the resume content (textarea data)
+			write_user_file(resume_content, user_id, path="resume.md")
+
+			# Render with the new resume content
+			return redirect("/sample")
+
+		# If neither file nor text content is provided, return an error
+		return {"error": "No resume file or content provided"}, 400
 
 
-@app.route("/sample")
+@app.route("/sample", methods=["GET", "POST"])
 def sample():
-	return render_template("sample.html")
+
+	if request.method == "GET":
+
+		s = read_user_file(get_user_id(session), "sample.md")
+		return render_template("sample.html", sample=s)
+
+	else:
+
+		if "sample" in request.form:
+
+			write_user_file(request.form["sample"], get_user_id(session), "sample.md")
+
+			return redirect("/job")
+		
+		else:
+
+			return {"error": "No sample letter provided."}, 400
 
 
-@app.route("/job")
+@app.route("/job", methods=["GET", "POST"])
 def job():
-	return render_template("job.html")
+
+	if request.method == "GET":
+
+		job_posting = read_user_file(get_user_id(session), "job.md")
+
+		return render_template("job.html", job=job_posting)
+
+	else:
+
+		if "url" in request.form and request.form["url"]:
+
+			url = request.form["url"]
+
+			job_posting = get_job_posting(url)
+
+			write_user_file(job_posting, get_user_id(session), "job.md")
+
+			return render_template("job.html", job=job_posting)
+
+		elif "job" in request.form:
+
+			session["feedback"] = []
+
+			job_posting = request.form["job"]
+
+			write_user_file(job_posting, get_user_id(session), "job.md")
+
+			return redirect("/letter/generate")
+
+		else:
+			
+			return {"error": "No job URL or description provided."}, 400
 
 
-@app.route("/letter")
+@app.route("/job/new")
+def job_new():
+
+	user_id = get_user_id(session)
+
+	write_user_file("", user_id, "job.md")
+	write_user_file("", user_id, "letter.md")
+
+	return redirect("/job")
+
+
+@app.route("/letter", methods=["GET", "POST"])
 def letter():
-	job = open("job.md", "r", encoding="utf-8").read().replace("\n", "\\n")
-	resume = open("resume.md", "r", encoding="utf-8").read().replace("\n", "\\n")
-	letter = open("letter.md", "r", encoding="utf-8").read()
-	return render_template("letter.html", job=job, resume=resume, letter=letter)
+
+	user_id = get_user_id(session)
+
+	if request.method == "GET":
+
+		options = {
+			"job": read_user_file(user_id, "job.md").replace("\n", "\\n"),
+			"resume": read_user_file(user_id, "resume.md").replace("\n", "\\n"),
+			"title": read_user_file(user_id, "title.md"),
+			"letter": read_user_file(user_id, "letter.md")
+		}
+		
+		return render_template("letter.html", **options)
+	
+	else:
+
+		if "letter" in request.form:
+
+			save_path = os.path.join(database_path, user_id, "saved")
+
+			title = read_user_file(user_id, "title.md")
+			resume = read_user_file(user_id, "resume.md")
+			job = read_user_file(user_id, "job.md")
+			letter = request.form["letter"]
+			
+			if "loaded" in session:
+				if job == read_user_file(user_id, os.path.join("saved", session["loaded"], "job.md")):
+					save_id = session["loaded"]
+				else:
+					save_id = ""
+
+			write_user_file(letter, user_id, "letter.md")
+			save(save_path, resume, job, letter, title=title, save_id=save_id)
+
+			return redirect("/dashboard")
+		
+		else:
+
+			return {"error": "No cover letter provided."}, 400
 
 
-@app.route("/api/resume/upload", methods=["POST"])
-def api_resume_upload():
+@app.route("/letter/generate", methods=["GET", "POST"])
+def letter_generate():
 
-	# Error if no file uploaded
-	if "resume" not in request.files:
-		return {"error": "No file uploaded"}, 400
+	if request.method == "POST":
+		if "feedback" in request.form:
+			session["feedback"].append(request.form["feedback"])
 
-	# Get the uploaded file
-	upload = request.files["resume"]
+	user_id = get_user_id(session)
 
-	# Error if no file selected
-	if upload.filename == "":
-		return {"error": "No selected file"}, 400
+	resume = read_user_file(user_id, "resume.md")
+	job = read_user_file(user_id, "job.md")
+	sample = read_user_file(user_id, "sample.md")
 
-	# Error if file extension is not supported
-	if not upload.filename.endswith(".pdf"):
-		return {"error": "Only PDF files are supported"}, 400
+	examples = [(resume, "No job description provided.", sample)]
+	save_path = os.path.join(database_path, user_id, "saved")
+	if os.path.exists(save_path):
+		for directory in os.listdir(save_path):
+			examples += [load(os.path.join(save_path, directory))]
+	
+	write_user_file(pick_job_title(job), user_id, "title.md")
+	write_user_file(generate(examples, resume, job, comments=session["feedback"]), user_id, "letter.md")
 
-	with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as file:
-
-		# Write the uploaded file to a temporary file
-		file.write(upload.read())
-		file.flush()
-
-		# Get the filename of the temporary file
-		filename = file.name
-
-	# Extract the text from the temporary file
-	text = parse_pdf(filename)
-	# print(text)
-
-	# Save extracted text in session cookie
-	session["resume"] = text
-
-	# Delete the temporary file
-	os.remove(filename)
-
-	# Success
-	return {"message": "Resume uploaded successfully", "text": text}, 200
+	return redirect("/letter")
 
 
-@app.route("/api/resume/edit", methods=["POST"])
-def api_resume_edit():
+@app.route("/letter/load/<save_id>")
+def letter_load(save_id):
 
-	# Error if no string is provided
-	if not request.json or "resume" not in request.json:
-		return {"error": "No resume text provided"}, 400
+	session["loaded"] = save_id
 
-	# Get the resume text from the request
-	text = request.json["resume"]
-	# print(text)
+	user_id = get_user_id(session)
 
-	# Save the resume text in session cookie
-	session["resume"] = text
+	title = read_user_file(user_id, os.path.join("saved", save_id, "title.md"))
+	job = read_user_file(user_id, os.path.join("saved", save_id, "job.md"))
+	resume = read_user_file(user_id, os.path.join("saved", save_id, "resume.md"))
+	letter = read_user_file(user_id, os.path.join("saved", save_id, "letter.md"))
+	
+	write_user_file(title, user_id, "title.md")
+	write_user_file(job, user_id, "job.md")
+	write_user_file(resume, user_id, "resume.md")
+	write_user_file(letter, user_id, "letter.md")
 
-	# Success
-	return {"message": "Resume updated successfully", "text": text}, 200
-
-
-@app.route("/api/generate", methods=["POST"])
-def api_generate():
-	return
+	return redirect("/letter")
 
 
 if __name__ == "__main__":

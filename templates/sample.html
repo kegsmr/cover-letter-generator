@@ -2,11 +2,24 @@
 
 {% block content %}
 
-    <h1>Provide a Sample Cover Letter (optional)</h1>
-    <textarea id="sample-input">{{ sample_content }}</textarea>
+    <h1>Provide a Sample Cover Letter (Optional)</h1>
+    
+    <form id="sample-form" method="POST" action="{{ url_for('sample') }}">
+        <textarea name="sample" id="sample-input" style="flex: 1; min-height: 717px;">{{ sample }}</textarea>
+        <input type="hidden" name="sample" id="hidden-sample">
+    </form>
 
-	<div style="display: flex; gap: 10px;">
-        <button onclick="window.history.back();">Back</button>
-        <button onclick="window.location.href='{{ url_for('job') }}';">Continue</button>
+    <div style="display: flex; gap: 10px;">
+        <button onclick="window.location.href='{{ url_for('resume') }}';">Back</button>
+        <button type="button" onclick="submitSample()">Continue</button>
     </div>
+
+    <script>
+        function submitSample() {
+            let sampleContent = document.getElementById("sample-input").value;
+            document.getElementById("hidden-sample").value = sampleContent;
+            document.getElementById("sample-form").submit();
+        }
+    </script>
+
 {% endblock %}
