@@ -7,7 +7,6 @@ import random
 import re
 
 from flask import Flask, render_template, redirect, request, session, url_for
-from authlib.integrations.flask_client import OAuth
 
 from generator import *
 
