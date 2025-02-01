@@ -292,6 +292,7 @@ def job_new():
 
 	user_id = get_user_id(session)
 
+	write_user_file("", user_id, "title.md")
 	write_user_file("", user_id, "job.md")
 	write_user_file("", user_id, "letter.md")
 
@@ -308,7 +309,7 @@ def letter():
 		title = read_user_file(user_id, "title.md")
 
 		if not title:
-			title = "Job Posting"
+			title = "(Job Title)"
 
 		options = {
 			"job": read_user_file(user_id, "job.md").replace("\n", "\\n"),
