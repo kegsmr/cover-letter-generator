@@ -7,7 +7,6 @@ import random
 import re
 
 from flask import Flask, render_template, redirect, request, session, url_for
-from authlib.integrations.flask_client import OAuth
 
 from generator import *
 
@@ -331,11 +330,10 @@ def letter():
 			job = read_user_file(user_id, "job.md")
 			letter = request.form["letter"]
 			
+			save_id = ""
 			if "loaded" in session:
 				if job == read_user_file(user_id, os.path.join("saved", session["loaded"], "job.md")):
 					save_id = session["loaded"]
-				else:
-					save_id = ""
 
 			write_user_file(letter, user_id, "letter.md")
 			save(save_path, resume, job, letter, title=title, save_id=save_id)
