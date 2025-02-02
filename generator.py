@@ -27,6 +27,7 @@ def main():
 
 	try:
 		if not os.path.exists(RESUME_PATH):
+			print("\033[90mStatus: Reading your resume...\033[90m")
 			resume = parse_pdf("resume.pdf")
 			open(RESUME_PATH, "w", encoding="utf-8").write(resume)
 		else:
@@ -49,6 +50,7 @@ def main():
 				print()
 				break
 			job_posting += f"\n{i}"
+		print(f"\033[90mStatus: Formatting job posting...\033[90m")
 		job_posting = text_to_markdown(job_posting)
 
 	print("\033[34m")
@@ -85,7 +87,7 @@ def main():
 		print(f"Saved to `{path}`.")
 
 
-def generate(examples=[], resume="", job_posting="", comments=[]):
+def generate(examples=[], resume="", job_posting="", comments=[], callback=lambda message: print(f"\033[90mStatus: {message}\033[90m")):
 	
 	messages = []
 
@@ -147,6 +149,11 @@ def generate(examples=[], resume="", job_posting="", comments=[]):
 
 	# print([message["content"] for message in messages])
 
+	if len(comments) < 1:
+		callback("Our job experts are currently crafting your cover letter...")
+	else:
+		callback("Reviewing your feedback...")
+
 	cover_letter = ollama \
 		.chat(model, messages=messages) \
 		.message \
@@ -162,13 +169,16 @@ def generate(examples=[], resume="", job_posting="", comments=[]):
 		}
 	]
 
-	for _ in range(5):
+	for n in range(5):
+		callback(f"Reviewing draft {n + 1}...")
 		v = verify(resume, cover_letter)
 		if v is True:
+			callback(f"All done!")
 			return cover_letter
 		else:
+			callback(f"Writing draft {n + 2}...")
 			cover_letter = revise(messages, justification=v, resume=resume)
-
+	callback("Maximum drafts exceeded.")
 	return cover_letter
 
 
@@ -258,11 +268,14 @@ def get_html(url: str) -> str:
 		return content
 
 
-def get_job_posting(url: str):
+def get_job_posting(url: str, callback=lambda message: print(f"\033[90mStatus: {message}\033[90m")):
+
+	callback("Fetching job posting...")
 
 	html = get_html(url)
 	text = parse_html(html)
 
+	callback("Formatting job posting...")
 
 	messages = [
 		{
