@@ -8,11 +8,19 @@ import re
 import shutil
 
 from flask import Flask, render_template, redirect, request, session, url_for, send_from_directory
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from generator import *
 
 
 app = Flask(__name__)
+
+limiter = Limiter(
+	app=app, 
+	key_func=get_remote_address,
+	default_limits=["60 per minute"]
+)
 
 session_options = {"secret_key": os.urandom(24).hex(), "lifetime": 30}
 session_options_path = "session.json"
@@ -136,12 +144,15 @@ def get_user_jobs(user_id):
 		return None
 
 
-def set_user_status(user_id, status="Loading..."):
-	user_status[user_id] = status
+def set_user_status(user_id, status=None):
+	if status:
+		user_status[user_id] = status
+	else:
+		user_status.pop(user_id)
 
 
-def get_user_status(user_id):
-	return user_status.get(user_id, "Loading...")
+def get_user_status(user_id, default=None):
+	return user_status.get(user_id, default)
 
 
 @app.before_request
@@ -215,6 +226,7 @@ def home():
 
 
 @app.route("/resume", methods=["GET", "POST"])
+@limiter.limit(lambda: "6 per minute" if request.method == "POST" and "resume" in request.files else None)
 def resume():
 
 	user_id = get_user_id(session)
@@ -305,6 +317,7 @@ def sample():
 
 
 @app.route("/job", methods=["GET", "POST"])
+@limiter.limit(lambda: "6 per minute" if request.method == "POST" and "url" in request.form and request.form["url"] else None)
 def job():
 
 	user_id = get_user_id(session)
@@ -403,6 +416,7 @@ def letter():
 
 
 @app.route("/letter/generate", methods=["GET", "POST"])
+@limiter.limit("6 per minute")
 def letter_generate():
 
 	user_id = get_user_id(session)
@@ -483,7 +497,7 @@ def letter_load(save_id):
 @app.route("/status")
 def status():
 
-	return {"status": get_user_status(get_user_id(session))}
+	return {"status": get_user_status(get_user_id(session), "Hang tight...")}
 
 
 if __name__ == "__main__":
