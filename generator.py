@@ -182,7 +182,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], callback=lambd
 	return cover_letter
 
 
-def verify(resume, cover_letter):
+def verify(resume, cover_letter): #TODO compare job description to cover letter
 
 	content = "\n".join([
 		"Read this candidate's resume:",
