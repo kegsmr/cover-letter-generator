@@ -312,7 +312,7 @@ def job():
 			try:
 				job_posting = get_job_posting(url, callback=lambda message: set_user_status(user_id, message))
 			except Exception as e:
-				job_posting = f"Unable to fetch job description.\n\nYou can still copy and paste it manually.\n\nERROR:\n{e}"
+				job_posting = f"Unable to fetch job description.\n\nYou can still copy and paste it manually." + f"\n\nERROR:\n{e}" if request.remote_addr == "127.0.0.1" else ""
 
 			write_user_file(job_posting, user_id, "job.md")
 
