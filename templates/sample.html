@@ -10,15 +10,20 @@
     </form>
 
     <div class="footer-buttons">
-        <button onclick="window.location.href='{{ url_for('resume') }}';">Back</button>
-        <button type="button" onclick="submitSample()">Continue</button>
+        <button onclick="redirect('{{ url_for('resume') }}')">Back</button>
+        <button type="button" onclick="redirect('{{ url_for('job') }}')">Continue</button>
     </div>
 
     <script>
-        function submitSample() {
-            let sampleContent = document.getElementById("sample-input").value;
-            document.getElementById("hidden-sample").value = sampleContent;
-            document.getElementById("sample-form").submit();
+        function redirect(url) {
+
+            let sample = document.getElementById("sample-input").value;
+			let form = document.getElementById("sample-form")
+
+			form.action = form.action + "?redirect=" + encodeURIComponent(url);
+
+            document.getElementById("hidden-sample").value = sample;
+            form.submit();
         }
     </script>
 

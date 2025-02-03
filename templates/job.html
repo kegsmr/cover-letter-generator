@@ -7,10 +7,12 @@
     <h1>Provide a Job Description</h1>
 
     <div>
-		<form method="POST" id="job-form" style="margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 10px;">
+		<form method="POST" enctype="multipart/form-data" id="job-form" style="margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 10px;">
             <!-- URL Input -->
             <input type="url" name="url" id="url" placeholder="Enter a URL" style="flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
         
+			<input type="hidden" name="job_content" id="job_content">
+
             <!-- Submit Button -->
             <button id="job-form-submit" type="submit" style="max-width:100px; padding: 12px 20px; background-color: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">
                 Submit
@@ -22,63 +24,87 @@
         <div style="display: flex; gap: 20px; justify-content: space-between; max-width: 100%; width: 100%; margin: 0 auto;">
             <!-- Editor section on the left -->
             <textarea id="markdown-input" name="job" style="flex: 1; height: 600px; padding: 10px; font-family: 'Courier New', monospace; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; resize: vertical;">{{ job }}</textarea>
-        
+
             <!-- Preview section on the right -->
             <div id="markdown-preview" style="flex: 1; height: 600px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;"></div>
         </div>	
     </div>
 
     <div class="footer-buttons">
-        <button onclick="window.location.href='{{ url_for('sample') }}';">Back</button>
-        <!-- Instead of a fetch call, we use a function that submits a hidden form -->
-        <button type="button" onclick="submitJobAndGenerate()">Generate</button>
+        <button onclick="redirect('{{ url_for('sample') }}')">Back</button>
+        <button type="button" onclick="generate()">Generate</button>
     </div>
 
     <!-- JavaScript to submit the job description and then trigger letter generation -->
     <script>
 		document.getElementById("job-form-submit").addEventListener("click", function(event) {
+			event.preventDefault();
 
-			event.preventDefault()
+			let form = document.getElementById("job-form");
+			let urlInput = document.getElementById("url").value.trim(); // Trim to remove leading/trailing spaces
 
-			let form = document.getElementById("job-form")
-
-			showLoadingScreen("Fetching job description...");
-
-			document.body.appendChild(form);
-			form.submit()
-			
+			if (urlInput.length > 1) {
+				showLoadingScreen("Fetching job description...");
+				document.body.appendChild(form);
+				form.submit();
+			} else {
+				alert("Please enter a valid URL before submitting.");
+			}
 		});
 
-        function submitJobAndGenerate() {
+        function redirect(url) {
 
             // Get the job description from the textarea
-            let jobContent = document.getElementById("markdown-input").value;
-            let jobFormData = new FormData();
-            jobFormData.append("job", jobContent);
+            // let jobContent = document.getElementById("markdown-input").value;
+            // let jobFormData = new FormData();
+            // jobFormData.append("job", jobContent);
+
+			// Update the hidden input with the content of the textarea
+            const textareaContent = document.getElementById("markdown-input").value;
+            document.getElementById("job_content").value = textareaContent;
+
+            // Now submit the form
+            let form = document.getElementById("job-form");
+			form.action = form.action + "?redirect=" + encodeURIComponent(url);
+			form.submit()
+
+            // First, submit the job description to the /job route
+            // fetch("{{ url_for('job') }}", {
+            //     method: "POST",
+            //     body: jobFormData
+            // })
+            // .then(response => {
+            //     if (response.ok) {
+            //         // After successful job submission, create and submit a hidden form to POST to /letter/generate
+            //         let form = document.createElement("form");
+            //         form.method = "POST";
+            //         form.action = "{{ url_for('letter_generate') }}";
+            //         document.body.appendChild(form);
+            //         form.submit();
+            //     } else {
+            //         alert("Error submitting job description.");
+            //     }
+            // })
+			// // .then(window.location.href = "{{ url_for('letter') }}")
+            // .catch(error => {
+            //     console.error("Error submitting job:", error);
+            // });
+        }
+
+		function generate() {
+
+			// Update the hidden input with the content of the textarea
+            const textareaContent = document.getElementById("markdown-input").value;
+            document.getElementById("job_content").value = textareaContent;
+
+			let form = document.getElementById("job-form");
+			form.action = form.action + "?redirect=" + encodeURIComponent("/letter/generate");
 
 			showLoadingScreen("Our job experts are currently crafting your cover letter...");
 
-            // First, submit the job description to the /job route
-            fetch("{{ url_for('job') }}", {
-                method: "POST",
-                body: jobFormData
-            })
-            .then(response => {
-                if (response.ok) {
-                    // After successful job submission, create and submit a hidden form to POST to /letter/generate
-                    let form = document.createElement("form");
-                    form.method = "POST";
-                    form.action = "{{ url_for('letter_generate') }}";
-                    document.body.appendChild(form);
-                    form.submit();
-                } else {
-                    alert("Error submitting job description.");
-                }
-            })
-			// .then(window.location.href = "{{ url_for('letter') }}")
-            .catch(error => {
-                console.error("Error submitting job:", error);
-            });
-        }
+			document.body.appendChild(form);
+			form.submit()
+
+		}
     </script>
 {% endblock %}

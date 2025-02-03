@@ -6,14 +6,19 @@
     <title>AI Cover Letter Generator</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 	<script defer src="/static/js/scripts.js"></script>
+	<script>
+		function redirect(url) {
+			window.location.href=url
+		};
+	</script>
 </head>
 <body>
     <nav>
-        <button onclick="window.location.href='{{ url_for('home') }}';">Home</button>
-		<button onclick="window.location.href='{{ url_for('resume') }}';">Resume</button>
-		<button onclick="window.location.href='{{ url_for('sample') }}';">Writing Sample</button>
-		<button onclick="window.location.href='{{ url_for('job') }}';">Job Description</button>
-		<button onclick="window.location.href='{{ url_for('letter') }}';">Cover Letter</button>
+        <button onclick="redirect('{{ url_for('home') }}');">Home</button>
+		<button onclick="redirect('{{ url_for('resume') }}');">Resume</button>
+		<button onclick="redirect('{{ url_for('sample') }}');">Writing Sample</button>
+		<button onclick="redirect('{{ url_for('job')  }}');">Job Description</button>
+		<button onclick="redirect('{{ url_for('letter') }}');">Cover Letter</button>
     </nav>
     <main>
         <section id="content">

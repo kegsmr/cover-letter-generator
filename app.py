@@ -96,10 +96,12 @@ def read_user_file(user_id, path="", fix_spacing=True, **kwargs):
 		return ""
 
 
-def write_user_file(data, user_id, path="", mode="w", encoding="utf-8"):
+def write_user_file(data, user_id, path="", mode="w", encoding="utf-8", fix_spacing=True):
 	user_path = os.path.join(database_path, user_id)
 	if path:
 		user_path = os.path.join(user_path, path)
+	if fix_spacing:
+			data = re.sub(r'\n{3,}', '\n\n', data).strip()
 	with open(user_path, mode, encoding=encoding) as user_file:
 		user_file.write(data)
 
@@ -240,13 +242,15 @@ def resume():
 		# Handling the textarea content submission
 		if "resume_content" in request.form:
 
+			url = request.args.get('redirect')
+
 			resume_content = request.form["resume_content"]
 
 			# Save the resume content (textarea data)
 			write_user_file(resume_content, user_id, path="resume.md")
 
 			# Render with the new resume content
-			return redirect("/sample")
+			return redirect(url)
 
 		# If neither file nor text content is provided, return an error
 		return {"error": "No resume file or content provided"}, 400
@@ -264,9 +268,11 @@ def sample():
 
 		if "sample" in request.form:
 
+			url = request.args.get('redirect')
+
 			write_user_file(request.form["sample"], get_user_id(session), "sample.md")
 
-			return redirect("/job")
+			return redirect(url)
 		
 		else:
 
@@ -292,27 +298,29 @@ def job():
 
 			url = request.form["url"]
 
-			if not url.startswith("http://") or url.startswith("https://"):
+			if not (url.startswith("http://") or url.startswith("https://")):
 				url = f"http://{url}"
 
 			try:
 				job_posting = get_job_posting(url, callback=lambda message: set_user_status(user_id, message))
 			except Exception as e:
-				job_posting = "Unable to fetch job description."
+				job_posting = f"Unable to fetch job description.\n\nYou can still copy and paste it manually.\n\nERROR:\n{e}"
 
 			write_user_file(job_posting, user_id, "job.md")
 
 			return render_template("job.html", job=job_posting)
 
-		elif "job" in request.form:
+		elif "job_content" in request.form:
+
+			url = request.args.get('redirect')
 
 			session["feedback"] = []
 
-			job_posting = request.form["job"]
+			job_posting = request.form["job_content"]
 
 			write_user_file(job_posting, user_id, "job.md")
 
-			return {"success": ""} #redirect("/letter/generate")
+			return redirect(url)
 
 		else:
 
@@ -356,22 +364,13 @@ def letter():
 
 		if "letter" in request.form:
 
-			save_path = os.path.join(database_path, user_id, "saved")
+			url = request.args.get('redirect')
 
-			title = read_user_file(user_id, "title.md")
-			resume = read_user_file(user_id, "resume.md")
-			job = read_user_file(user_id, "job.md")
 			letter = request.form["letter"]
-			
-			save_id = ""
-			if "loaded" in session:
-				if job == read_user_file(user_id, os.path.join("saved", session["loaded"], "job.md")):
-					save_id = session["loaded"]
 
 			write_user_file(letter, user_id, "letter.md")
-			save(save_path, resume, job, letter, title=title, save_id=save_id)
 
-			return redirect("/home")
+			return redirect(url)
 		
 		else:
 
@@ -408,6 +407,29 @@ def letter_generate():
 	write_user_file(generate(examples, resume, job, comments=session["feedback"], callback=lambda message: set_user_status(user_id, message)), user_id, "letter.md")
 
 	return redirect("/letter") #{"success": ""} 
+
+
+@app.route("/letter/save", methods=["POST"])
+def letter_save():
+
+	user_id = get_user_id(session)
+
+	save_path = os.path.join(database_path, user_id, "saved")
+
+	title = read_user_file(user_id, "title.md")
+	resume = read_user_file(user_id, "resume.md")
+	job = read_user_file(user_id, "job.md")
+	letter = request.form["letter"]
+	
+	save_id = ""
+	if "loaded" in session:
+		if job == read_user_file(user_id, os.path.join("saved", session["loaded"], "job.md")):
+			save_id = session["loaded"]
+
+	write_user_file(letter, user_id, "letter.md")
+	save(save_path, resume, job, letter, title=title, save_id=save_id)
+
+	return redirect("/home")
 
 
 @app.route("/letter/load/<save_id>")

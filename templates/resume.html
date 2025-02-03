@@ -35,8 +35,8 @@
     <br>
 
     <div class="footer-buttons">
-        <button onclick="window.location.href='{{ url_for('home') }}';">Back</button>
-        <button onclick="submitFormAndContinue(event)">Continue</button>
+        <button onclick="redirect('{{ url_for('home') }}');">Back</button>
+        <button onclick="redirect('{{ url_for('sample') }}');">Continue</button>
     </div>
 
     <script>
@@ -59,15 +59,17 @@
 		});
 
         // Function to update hidden input with the content of the textarea and submit form
-        function submitFormAndContinue(event) {
-            event.preventDefault(); // Prevent default form submission
+        function redirect(url) {
             
             // Update the hidden input with the content of the textarea
             const textareaContent = document.getElementById("markdown-input").value;
             document.getElementById("resume_content").value = textareaContent;
 
             // Now submit the form
-            document.getElementById("resume-form").submit();
+            let form = document.getElementById("resume-form");
+			form.action = form.action + "?redirect=" + encodeURIComponent(url);
+			form.submit()
+			
         }
     </script>
 {% endblock %}

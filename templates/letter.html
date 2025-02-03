@@ -34,7 +34,7 @@
     <br>
 
     <div class="footer-buttons">
-        <button onclick="window.location.href='{{ url_for('job') }}';">Back</button>
+        <button onclick="redirect('{{ url_for('job') }}')">Back</button>
         <button id="save-btn" onclick="saveAndExit()">Save & Exit</button>
     </div>
 
@@ -45,6 +45,28 @@
         function resizeTextarea(element) {
             element.style.height = 'auto';
             element.style.height = (element.scrollHeight) + 'px';
+        }
+
+		function redirect(url) {
+            const letterContent = document.getElementById("letter-edit-input").value;
+            const formData = new FormData();
+            formData.append("letter", letterContent);
+
+            fetch("{{ url_for('letter') }}?redirect=" + url, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = url;
+                } else {
+                    alert("Error saving your cover letter.");
+                }
+            })
+            .catch(error => {
+                console.error("Error saving letter:", error);
+                alert("Error saving your cover letter.");
+            });
         }
 
         function regenerateCoverLetter() {
@@ -80,7 +102,7 @@
             const formData = new FormData();
             formData.append("letter", letterContent);
 
-            fetch("{{ url_for('letter') }}", {
+            fetch("{{ url_for('letter_save') }}", {
                 method: "POST",
                 body: formData
             })
