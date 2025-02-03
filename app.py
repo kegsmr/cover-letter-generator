@@ -6,7 +6,7 @@ import time
 import random
 import re
 
-from flask import Flask, render_template, redirect, request, session, url_for
+from flask import Flask, render_template, redirect, request, session, url_for, send_from_directory
 
 from generator import *
 
@@ -149,6 +149,12 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_server_error(error):
 	return render_template('error.html', error_message="Internal server error, please try again later."), 500
+
+
+@app.route('/.well-known/acme-challenge/<filename>')
+def serve_challenge(filename):
+	challenge_directory = os.path.join(os.getcwd(), '.well-known', 'acme-challenge')
+	return send_from_directory(challenge_directory, filename)
 
 
 @app.route("/")
