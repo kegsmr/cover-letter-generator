@@ -460,6 +460,9 @@ def letter_load(save_id):
 	return redirect("/letter")
 
 
+#TODO letter delete
+
+
 @app.route("/status")
 def status():
 
