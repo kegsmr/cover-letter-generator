@@ -25,6 +25,8 @@ else:
 app.secret_key = bytes.fromhex(session_options["secret_key"])
 app.permanent_session_lifetime = timedelta(days=session_options["lifetime"])
 
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+
 database_path = "database"
 
 user_status = {}
