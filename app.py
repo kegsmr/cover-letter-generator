@@ -167,8 +167,12 @@ def internal_server_error(error):
 
 @app.route('/.well-known/acme-challenge/<filename>')
 def serve_challenge(filename):
-	challenge_directory = os.path.join(os.getcwd(), '.well-known', 'acme-challenge')
-	return send_from_directory(challenge_directory, filename)
+	certbot_redirect = os.getenv("CERTBOT_REDIRECT")
+	if certbot_redirect:
+		return redirect(f"http://{certbot_redirect}/.well-known/acme-challenge/{filename}", code=301)
+	else:
+		challenge_directory = os.path.join(os.getcwd(), '.well-known', 'acme-challenge')
+		return send_from_directory(challenge_directory, filename)
 
 
 @app.route("/")
