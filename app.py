@@ -5,6 +5,7 @@ from datetime import timedelta
 import time 
 import random
 import re
+import shutil
 
 from flask import Flask, render_template, redirect, request, session, url_for, send_from_directory
 
@@ -28,6 +29,17 @@ app.permanent_session_lifetime = timedelta(days=session_options["lifetime"])
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 database_path = "database"
+os.makedirs(database_path, exist_ok=True)
+for directory in os.scandir(database_path):
+	if directory.is_dir():
+		last_modification = os.path.getmtime(directory.path)
+		for root, _, files in os.walk(directory.path):
+			for file in files:
+				file_path = os.path.join(root, file)
+				last_modification = max(last_modification, os.path.getmtime(file_path))
+		if (time.time() - last_modification) > (session_options["lifetime"] * 86400):
+			print(f"Deleting `{directory.path}`...")
+			shutil.rmtree(directory.path, ignore_errors=True)
 
 user_status = {}
 
