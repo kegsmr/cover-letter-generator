@@ -349,6 +349,7 @@ a:hover {
 /* Style for Back button */
 .footer-buttons button:first-child {
     background: #f0f0f0;
+	color: black
 }
 
 .footer-buttons button:first-child:hover {
