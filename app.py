@@ -216,7 +216,7 @@ def resume():
 				return {"error": "No selected file"}, 400
 
 			# Error if file extension is not supported
-			if not upload.filename.endswith(".pdf"):
+			if upload.mimetype != "application/pdf":
 				return {"error": "Only PDF files are supported"}, 400
 
 			with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as file:
