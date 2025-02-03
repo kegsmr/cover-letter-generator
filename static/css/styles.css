@@ -396,3 +396,36 @@ a:hover {
     font-size: 18px;
     color: #333;
 }
+
+.error-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+.error-container {
+    text-align: center;
+    padding: 60px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    margin: 100px auto;
+    max-width: 500px;
+    border-top: 5px solid #e74c3c;
+}
+
+.error-link {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none; /* Prevent underlining */
+    transition: background-color 0.3s ease;
+}
+
+.error-link:hover {
+    background-color: #c0392b;
+    color: white; /* Ensure text stays white on hover */
+    text-decoration: none; /* Prevent underline on hover */
+}
