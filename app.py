@@ -161,13 +161,14 @@ def serve_challenge(filename):
 
 @app.route("/")
 def index():
-	user_id = get_user_id(session)
-	if not get_user_path(user_id, "resume.md"):
-		return redirect("/welcome")
-	if not get_user_jobs(user_id):
-		return redirect("/job")
-	else:
-		return redirect("/home")
+	return redirect("/home")
+	# user_id = get_user_id(session)
+	# if not get_user_path(user_id, "resume.md"):
+	# 	return redirect("/welcome")
+	# if not get_user_jobs(user_id):
+	# 	return redirect("/job")
+	# else:
+	# 	return redirect("/home")
 
 
 @app.route("/home")
