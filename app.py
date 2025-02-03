@@ -41,6 +41,9 @@ for directory in os.scandir(database_path):
 			print(f"Deleting `{directory.path}`...")
 			shutil.rmtree(directory.path, ignore_errors=True)
 
+LOCAL_USER_ID = "local"
+local_user_enabled = False
+
 user_status = {}
 
 # oauth_path = "oauth.json"
@@ -64,18 +67,15 @@ user_status = {}
 
 
 def get_user_id(s) -> str:
-	LOCAL_USER_ID = "local"
-	if request.remote_addr == "127.0.0.1":
+	if local_user_enabled and request.remote_addr == "127.0.0.1":
 		return LOCAL_USER_ID
 	if "user_id" in s:
 		user_id = sanitize_directory_name(s["user_id"])
-		if user_id == LOCAL_USER_ID:
-			raise Exception("Attempted login to local user from external address.")
-		return s["user_id"]
-	else:
-		user_id = f"{int(time.time() * 1000)}-{random.randint(1000, 9999)}"
-		s["user_id"] = user_id
-		return user_id
+		if user_id != LOCAL_USER_ID:
+			return user_id
+	new_user_id = f"{int(time.time() * 1000)}-{random.randint(1000, 9999)}"
+	s["user_id"] = new_user_id
+	return new_user_id
 
 
 def get_user_path(user_id, path="") -> str:
@@ -487,4 +487,7 @@ def status():
 
 
 if __name__ == "__main__":
+
+	local_user_enabled = True
+
 	app.run(debug=True)
