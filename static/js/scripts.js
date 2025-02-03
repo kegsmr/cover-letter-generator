@@ -87,3 +87,27 @@ function hideLoadingOverlay(overlay, targetElementId) {
     targetElement.style.filter = "";
     targetElement.style.pointerEvents = ""; // Re-enable interaction
 }
+
+// Create and insert the loading screen into the document
+function showLoadingScreen(defaultMessage = "Loading...") {
+    document.body.innerHTML = `
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <div class="status-message">${defaultMessage}</div>
+        </div>
+    `;
+
+	setInterval(fetchStatus, 3000);
+}
+
+// Function to fetch status updates
+async function fetchStatus() {
+    try {
+        const response = await fetch('/status');
+        if (!response.ok) throw new Error('Failed to fetch status');
+        const data = await response.json();
+        document.querySelector('.status-message').textContent = data.status || 'Updating...';
+    } catch (error) {
+        document.querySelector('.status-message').textContent = 'Error fetching status';
+    }
+}

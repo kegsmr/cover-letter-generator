@@ -14,7 +14,7 @@
 
     <!-- Feedback Form (Minimized Gap) -->
     <div class="button-container" style="display: flex; gap: 8px; align-items: center; margin-top: 0;">
-        <input type="text" id="inline-feedback" placeholder="Enter feedback here" style="flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+        <input type="text" id="inline-feedback" placeholder="What did we get wrong?" style="flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
         <button id="regen-btn" style="max-width: 150px; padding: 6px 10px;" onclick="regenerateCoverLetter()">Regenerate</button>
     </div>
 
@@ -48,12 +48,15 @@
         }
 
         function regenerateCoverLetter() {
+
             const feedback = document.getElementById("inline-feedback").value;
             const formData = new FormData();
             
             if (feedback.trim().length > 0) {
                 formData.append("feedback", feedback);
             }
+
+			showLoadingScreen("We all make mistakes...");
             
             fetch("{{ url_for('letter_generate') }}", {
                 method: "POST",
@@ -83,7 +86,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    window.location.href = "{{ url_for('dashboard') }}";
+                    window.location.href = "{{ url_for('home') }}";
                 } else {
                     alert("Error saving your cover letter.");
                 }

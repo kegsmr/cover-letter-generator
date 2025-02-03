@@ -149,10 +149,10 @@ def generate(examples=[], resume="", job_posting="", comments=[], callback=lambd
 
 	# print([message["content"] for message in messages])
 
-	if len(comments) < 1:
-		callback("Our job experts are currently crafting your cover letter...")
-	else:
-		callback("Reviewing your feedback...")
+	# if len(comments) < 1:
+	callback("Writing draft 1...")
+	# else:
+		# callback("Reviewing your feedback...")
 
 	cover_letter = ollama \
 		.chat(model, messages=messages) \
@@ -270,12 +270,12 @@ def get_html(url: str) -> str:
 
 def get_job_posting(url: str, callback=lambda message: print(f"\033[90mStatus: {message}\033[90m")):
 
-	callback("Fetching job posting...")
+	callback("Fetching job description...")
 
 	html = get_html(url)
 	text = parse_html(html)
 
-	callback("Formatting job posting...")
+	callback("Formatting job description...")
 
 	messages = [
 		{

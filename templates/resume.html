@@ -15,7 +15,7 @@
             <input type="hidden" name="resume_content" id="resume_content">
 
             <!-- Submit Button for Upload -->
-            <button onclick="ShowLoadingOverlay('content')" type="submit" style="max-width:100px; padding: 12px 20px; background-color: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">
+            <button id="resume-form-submit" type="submit" style="max-width:100px; padding: 12px 20px; background-color: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">
                 Upload
             </button>
         </form>
@@ -35,11 +35,29 @@
     <br>
 
     <div class="footer-buttons">
-        <button onclick="window.location.href='{{ url_for('dashboard') }}';">Back</button>
+        <button onclick="window.location.href='{{ url_for('home') }}';">Back</button>
         <button onclick="submitFormAndContinue(event)">Continue</button>
     </div>
 
     <script>
+		document.getElementById("resume-form-submit").addEventListener("click", function(event) {
+			event.preventDefault(); // Prevent the default form submission
+
+			let fileInput = document.getElementById("resume");
+			let form = document.getElementById("resume-form");
+
+			// Check if a file is selected
+			if (!fileInput.files.length) {
+				alert("Please select a file before uploading.");
+				return;
+			}
+
+			showLoadingScreen("Reading your resume...");
+
+			document.body.appendChild(form);
+			form.submit();
+		});
+
         // Function to update hidden input with the content of the textarea and submit form
         function submitFormAndContinue(event) {
             event.preventDefault(); // Prevent default form submission
@@ -47,7 +65,7 @@
             // Update the hidden input with the content of the textarea
             const textareaContent = document.getElementById("markdown-input").value;
             document.getElementById("resume_content").value = textareaContent;
-            
+
             // Now submit the form
             document.getElementById("resume-form").submit();
         }

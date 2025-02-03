@@ -1,11 +1,12 @@
 {% extends "app.html" %}
 
 {% block content %}
-	<div style="max-width: 1200px; margin-left: auto; margin-right: auto;">
+	<div style="max-width: 1200px; margin-left: auto; margin-right: auto; padding: 10px;">
 		<h1>Welcome to the AI Cover Letter Generator</h1>
 		<p>Welcome back! Your AI-powered cover letter assistant is here to help streamline your job applications. Quickly access your saved cover letters, update your resume, or generate a new tailored cover letter with just a few clicks. Let’s make your job search more efficient and effective!</p>
 		<br>
 		<button onclick="window.location.href='{{ url_for('job_new') }}';">New Cover Letter</button>
+		<br>
 		<br>
 		<br>
 		<h2>Your Profile</h2>

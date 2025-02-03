@@ -27,6 +27,8 @@ app.permanent_session_lifetime = timedelta(days=session_options["lifetime"])
 
 database_path = "database"
 
+user_status = {}
+
 # oauth_path = "oauth.json"
 # oauth_default_client_id = "YOUR_CLIENT_ID"
 # oauth_default_client_secret = "YOUR_CLIENT_SECRET"
@@ -118,6 +120,14 @@ def get_user_jobs(user_id):
 		return None
 
 
+def set_user_status(user_id, status="Loading..."):
+	user_status[user_id] = status
+
+
+def get_user_status(user_id):
+	return user_status.get(user_id, "Loading...")
+
+
 @app.before_request
 def make_session_permanent():
 	session.permanent = True
@@ -147,21 +157,30 @@ def index():
 	if not get_user_jobs(user_id):
 		return redirect("/job")
 	else:
-		return redirect("/dashboard")
+		return redirect("/home")
 
 
-@app.route("/welcome")
-def welcome():
-	return render_template("welcome.html")
-
-
-@app.route("/dashboard")
-def dashboard():
+@app.route("/home")
+def home():
 	jobs = get_user_jobs(get_user_id(session))
 	if jobs:
 		return render_template("dashboard.html", jobs=jobs)
 	else:
-		return redirect("welcome")
+		return render_template("welcome.html")
+
+
+# @app.route("/welcome")
+# def welcome():
+# 	return render_template("welcome.html")
+
+
+# @app.route("/dashboard")
+# def dashboard():
+# 	jobs = get_user_jobs(get_user_id(session))
+# 	if jobs:
+# 		return render_template("dashboard.html", jobs=jobs)
+# 	else:
+# 		return redirect("welcome")
 
 # @app.route("/login")
 # def login():
@@ -172,8 +191,10 @@ def dashboard():
 def resume():
 
 	user_id = get_user_id(session)
-
+	
 	if request.method == "GET":
+
+		set_user_status(user_id)
 
 		# Get the user's resume text (if it exists)
 		r = read_user_file(user_id, "resume.md")
@@ -183,6 +204,8 @@ def resume():
 
 		# Handling the file upload
 		if "resume" in request.files and request.files["resume"].filename != "":
+
+			set_user_status(user_id, "Reading your resume...")
 
 			upload = request.files["resume"]
 
@@ -253,9 +276,13 @@ def sample():
 @app.route("/job", methods=["GET", "POST"])
 def job():
 
+	user_id = get_user_id(session)
+
 	if request.method == "GET":
 
-		job_posting = read_user_file(get_user_id(session), "job.md")
+		set_user_status(user_id)
+
+		job_posting = read_user_file(user_id, "job.md")
 
 		return render_template("job.html", job=job_posting)
 
@@ -265,9 +292,15 @@ def job():
 
 			url = request.form["url"]
 
-			job_posting = get_job_posting(url)
+			if not url.startswith("http://") or url.startswith("https://"):
+				url = f"http://{url}"
 
-			write_user_file(job_posting, get_user_id(session), "job.md")
+			try:
+				job_posting = get_job_posting(url, callback=lambda message: set_user_status(user_id, message))
+			except Exception as e:
+				job_posting = "Unable to fetch job description."
+
+			write_user_file(job_posting, user_id, "job.md")
 
 			return render_template("job.html", job=job_posting)
 
@@ -277,13 +310,13 @@ def job():
 
 			job_posting = request.form["job"]
 
-			write_user_file(job_posting, get_user_id(session), "job.md")
+			write_user_file(job_posting, user_id, "job.md")
 
-			return redirect("/letter/generate")
+			return {"success": ""} #redirect("/letter/generate")
 
 		else:
-			
-			return {"error": "No job URL or description provided."}, 400
+
+			return redirect("/job")
 
 
 @app.route("/job/new")
@@ -338,7 +371,7 @@ def letter():
 			write_user_file(letter, user_id, "letter.md")
 			save(save_path, resume, job, letter, title=title, save_id=save_id)
 
-			return redirect("/dashboard")
+			return redirect("/home")
 		
 		else:
 
@@ -348,11 +381,14 @@ def letter():
 @app.route("/letter/generate", methods=["GET", "POST"])
 def letter_generate():
 
+	user_id = get_user_id(session)
+	set_user_status(user_id)
+
 	if request.method == "POST":
 		if "feedback" in request.form:
-			session["feedback"].append(request.form["feedback"])
-
-	user_id = get_user_id(session)
+			feedback = request.form["feedback"]
+			if feedback:
+				session["feedback"].append(feedback)
 
 	resume = read_user_file(user_id, "resume.md")
 	job = read_user_file(user_id, "job.md")
@@ -369,9 +405,9 @@ def letter_generate():
 	# print(examples)
 	
 	write_user_file(pick_job_title(job), user_id, "title.md")
-	write_user_file(generate(examples, resume, job, comments=session["feedback"]), user_id, "letter.md")
+	write_user_file(generate(examples, resume, job, comments=session["feedback"], callback=lambda message: set_user_status(user_id, message)), user_id, "letter.md")
 
-	return redirect("/letter")
+	return redirect("/letter") #{"success": ""} 
 
 
 @app.route("/letter/load/<save_id>")
@@ -392,6 +428,12 @@ def letter_load(save_id):
 	write_user_file(letter, user_id, "letter.md")
 
 	return redirect("/letter")
+
+
+@app.route("/status")
+def status():
+
+	return {"status": get_user_status(get_user_id(session))}
 
 
 if __name__ == "__main__":
