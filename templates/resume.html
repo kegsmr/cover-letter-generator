@@ -54,6 +54,8 @@
 
 			showLoadingScreen("Reading your resume...");
 
+			form.hidden = true
+			form.style.display = 'none'; 
 			document.body.appendChild(form);
 			form.submit();
 		});

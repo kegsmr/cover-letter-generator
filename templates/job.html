@@ -45,6 +45,8 @@
 
 			if (urlInput.length > 1) {
 				showLoadingScreen("Fetching job description...");
+				form.hidden = true
+				form.style.display = 'none'; 
 				document.body.appendChild(form);
 				form.submit();
 			} else {
