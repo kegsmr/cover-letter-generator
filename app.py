@@ -56,7 +56,7 @@ def get_user_id(s) -> str:
 	if request.remote_addr == "127.0.0.1":
 		return LOCAL_USER_ID
 	if "user_id" in s:
-		user_id = s["user_id"]
+		user_id = sanitize_directory_name(s["user_id"])
 		if user_id == LOCAL_USER_ID:
 			raise Exception("Attempted login to local user from external address.")
 		return s["user_id"]
