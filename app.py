@@ -135,10 +135,10 @@ def make_session_permanent():
 	session.permanent = True
 
 
-@app.after_request
-def add_cors_headers(response):
-	response.headers['Access-Control-Allow-Origin'] = '*'
-	return response
+# @app.after_request
+# def add_cors_headers(response):
+# 	response.headers['Access-Control-Allow-Origin'] = '*'
+# 	return response
 
 
 @app.errorhandler(404)
