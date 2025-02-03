@@ -32,12 +32,12 @@ database_path = "database"
 os.makedirs(database_path, exist_ok=True)
 for directory in os.scandir(database_path):
 	if directory.is_dir():
-		last_modification = os.path.getmtime(directory.path)
+		last_modification = 0 #os.path.getmtime(directory.path)
 		for root, _, files in os.walk(directory.path):
 			for file in files:
 				file_path = os.path.join(root, file)
 				last_modification = max(last_modification, os.path.getmtime(file_path))
-		if (time.time() - last_modification) > (session_options["lifetime"] * 86400):
+		if not last_modification or (time.time() - last_modification) > (session_options["lifetime"] * 86400):
 			print(f"Deleting `{directory.path}`...")
 			shutil.rmtree(directory.path, ignore_errors=True)
 
