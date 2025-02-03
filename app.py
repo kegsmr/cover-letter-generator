@@ -147,7 +147,7 @@ def get_user_jobs(user_id):
 def set_user_status(user_id, status=None):
 	if status:
 		user_status[user_id] = status
-	else:
+	elif user_id in user_status:
 		user_status.pop(user_id)
 
 
