@@ -104,6 +104,8 @@
 
 			showLoadingScreen("Our job experts are currently crafting your cover letter...");
 
+			form.hidden = true
+			form.style.display = 'none'; 
 			document.body.appendChild(form);
 			form.submit()
 
