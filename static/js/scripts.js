@@ -120,3 +120,12 @@ function onEnter(callback) {
         }
     });
 }
+
+function onBackspace(callback) {
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Backspace' && document.activeElement === document.body) {
+            // Call the passed-in callback function
+            callback();
+        }
+    });
+}

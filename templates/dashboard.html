@@ -28,4 +28,9 @@
 			{% endfor %}
 		</ul>
 	</div>
+	<script>
+		onEnter(function() {
+			redirect('{{ url_for('job_new') }}');
+		});
+	</script>
 {% endblock %}

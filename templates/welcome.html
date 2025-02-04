@@ -14,5 +14,10 @@
 		<p>For more information, see the <a href="https://github.com/kegsmr/cover-letter-generator", target="_blank">GitHub repository</a>.</p>
 		<br>
 		<button onclick="redirect('{{ url_for('resume') }}')">Get Started</button>
+		<script>
+		onEnter(function() {
+			redirect('{{ url_for('resume') }}');
+		});
+		</script>
 	</div>
 {% endblock %}

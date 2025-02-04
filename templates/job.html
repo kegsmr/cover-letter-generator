@@ -120,5 +120,9 @@
 		onEnter(function() {
 			generate();
 		});
+
+		onBackspace(function() {
+			redirect('{{ url_for('sample') }}');
+		});
     </script>
 {% endblock %}

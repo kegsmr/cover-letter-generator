@@ -139,5 +139,9 @@
 		onEnter(function() {
 			regenerateCoverLetter();
 		});
+
+		onBackspace(function() {
+			redirect('{{ url_for('job') }}');
+		});
     </script>
 {% endblock %}

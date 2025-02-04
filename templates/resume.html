@@ -83,5 +83,9 @@
 		onEnter(function() {
 			redirect('{{ url_for('sample') }}');
 		});
+
+		onBackspace(function() {
+			redirect('{{ url_for('home') }}');
+		});
     </script>
 {% endblock %}

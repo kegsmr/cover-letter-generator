@@ -35,6 +35,10 @@
 		onEnter(function() {
 			redirect('{{ url_for('job') }}');
 		});
+
+		onBackspace(function() {
+			redirect('{{ url_for('resume') }}');
+		});
     </script>
 
 {% endblock %}
