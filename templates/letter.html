@@ -52,6 +52,8 @@
             const formData = new FormData();
             formData.append("letter", letterContent);
 
+			showLoadingScreen("Saving...")
+
             fetch("{{ url_for('letter') }}?redirect=" + url, {
                 method: "POST",
                 body: formData
@@ -101,6 +103,8 @@
             const letterContent = document.getElementById("letter-edit-input").value;
             const formData = new FormData();
             formData.append("letter", letterContent);
+
+			showLoadingScreen("Saving...")
 
             fetch("{{ url_for('letter_save') }}", {
                 method: "POST",

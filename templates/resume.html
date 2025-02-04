@@ -70,6 +70,12 @@
             // Now submit the form
             let form = document.getElementById("resume-form");
 			form.action = form.action + "?redirect=" + encodeURIComponent(url);
+
+			showLoadingScreen("Saving...")
+
+			form.hidden = true
+			form.style.display = 'none'; 
+			document.body.appendChild(form);
 			form.submit()
 			
         }

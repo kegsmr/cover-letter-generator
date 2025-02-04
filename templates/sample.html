@@ -23,7 +23,13 @@
 			form.action = form.action + "?redirect=" + encodeURIComponent(url);
 
             document.getElementById("hidden-sample").value = sample;
-            form.submit();
+
+            showLoadingScreen("Saving...")
+
+			form.hidden = true
+			form.style.display = 'none'; 
+			document.body.appendChild(form);
+			form.submit()
         }
     </script>
 
