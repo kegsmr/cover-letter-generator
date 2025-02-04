@@ -79,5 +79,9 @@
 			form.submit()
 			
         }
+
+		onEnter(function() {
+			redirect('{{ url_for('sample') }}');
+		});
     </script>
 {% endblock %}

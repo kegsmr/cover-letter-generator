@@ -31,6 +31,10 @@
 			document.body.appendChild(form);
 			form.submit()
         }
+
+		onEnter(function() {
+			redirect('{{ url_for('job') }}');
+		});
     </script>
 
 {% endblock %}

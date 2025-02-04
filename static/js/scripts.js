@@ -111,3 +111,12 @@ async function fetchStatus() {
         document.querySelector('.status-message').textContent = 'Error fetching status';
     }
 }
+
+function onEnter(callback) {
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && document.activeElement === document.body) {
+            // Call the passed-in callback function
+            callback();
+        }
+    });
+}
