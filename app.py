@@ -36,10 +36,15 @@ app.permanent_session_lifetime = timedelta(days=session_options["lifetime"])
 
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
+LOCAL_USER_ID = "local"
+local_user_enabled = False
+
 database_path = "database"
 os.makedirs(database_path, exist_ok=True)
 for directory in os.scandir(database_path):
 	if directory.is_dir():
+		if directory.name == LOCAL_USER_ID:
+			continue
 		last_modification = 0 #os.path.getmtime(directory.path)
 		for root, _, files in os.walk(directory.path):
 			for file in files:
@@ -48,9 +53,6 @@ for directory in os.scandir(database_path):
 		if not last_modification or (time.time() - last_modification) > (session_options["lifetime"] * 86400):
 			print(f"Deleting `{directory.path}`...")
 			shutil.rmtree(directory.path, ignore_errors=True)
-
-LOCAL_USER_ID = "local"
-local_user_enabled = False
 
 user_status = {}
 
