@@ -34,8 +34,8 @@
     <br>
 
     <div class="footer-buttons">
-        <button onclick="redirect('{{ url_for('job') }}')">Back</button>
-        <button id="save-btn" onclick="redirect('{{ url_for('home') }}')">Done</button>
+        <button onclick="redirect('{{ url_for('job') }}')" onmouseover="prefetch('{{ url_for('job') }}')">Back</button>
+        <button id="save-btn" onclick="redirect('{{ url_for('home') }}')" onmouseover="prefetch('{{ url_for('home') }}')">Done</button>
     </div>
 
     <script>

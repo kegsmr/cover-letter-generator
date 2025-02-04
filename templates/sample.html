@@ -10,8 +10,8 @@
     </form>
 
     <div class="footer-buttons">
-        <button onclick="redirect('{{ url_for('resume') }}')">Back</button>
-        <button type="button" onclick="redirect('{{ url_for('job') }}')">Continue</button>
+        <button onclick="redirect('{{ url_for('resume') }}')" onmouseover="prefetch('{{ url_for('resume') }}')">Back</button>
+        <button type="button" onclick="redirect('{{ url_for('job') }}')" onmouseover="prefetch('{{ url_for('job') }}')">Continue</button>
     </div>
 
     <script>

@@ -189,20 +189,20 @@ def render_template(template, **context):
 	if google_ads_client:
 		context.setdefault("google_ads_client", google_ads_client)
 
-	etag = get_etag({"template": template, "context": context})
-	client_etag = request.headers.get('If-None-Match')
+	# etag = get_etag({"template": template, "context": context})
+	# client_etag = request.headers.get('If-None-Match')
 	
-	if etag and client_etag:
-		client_etag = client_etag.strip("\"")
-		if etag == client_etag:
-			return Response(status=304)
+	# if etag and client_etag:
+	# 	client_etag = client_etag.strip("\"")
+	# 	if etag == client_etag:
+	# 		return Response(status=304)
 
 	# print(f"{etag} != {client_etag}")
 
 	response = Response(flask_render_template(template, **context))
 
-	if etag:
-		response.set_etag(etag)
+	# if etag:
+	# 	response.set_etag(etag)
 
 	return response
 
@@ -225,6 +225,14 @@ def get_loaded_id(user_id, job) -> str:
 @app.before_request
 def make_session_permanent():
 	session.permanent = True
+
+
+@app.after_request
+def add_headers(response):
+	response.cache_control.private = True
+	response.cache_control.max_age = 5
+	response.cache_control.must_revalidate = True
+	return response
 
 
 @app.errorhandler(404)
@@ -275,24 +283,6 @@ def home():
 		return render_template("dashboard.html", jobs=jobs)
 	else:
 		return render_template("welcome.html")
-
-
-# @app.route("/welcome")
-# def welcome():
-# 	return render_template("welcome.html")
-
-
-# @app.route("/dashboard")
-# def dashboard():
-# 	jobs = get_user_jobs(get_user_id(session))
-# 	if jobs:
-# 		return render_template("dashboard.html", jobs=jobs)
-# 	else:
-# 		return redirect("welcome")
-
-# @app.route("/login")
-# def login():
-# 	return render_template("login.html")
 
 
 @app.route("/resume", methods=["GET", "POST"])

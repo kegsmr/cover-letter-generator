@@ -17,13 +17,13 @@
 			menu.classList.toggle('show');
 		}
 
-		window.addEventListener('load', function() {
-			prefetch('/home');
-			prefetch('/resume');
-			prefetch('/sample');
-			prefetch('/job');
-			prefetch('/letter');
-		});
+		// window.addEventListener('load', function() {
+		// 	prefetch('/home');
+		// 	prefetch('/resume');
+		// 	prefetch('/sample');
+		// 	prefetch('/job');
+		// 	prefetch('/letter');
+		// });
 	</script>
 	{% if google_ads_client %}
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ google_ads_client }}" crossorigin="anonymous"></script>
@@ -36,11 +36,11 @@
         
         <!-- Navbar Menu (Hidden on Mobile) -->
         <div class="navbar-menu">
-            <button onclick="redirect('{{ url_for('home') }}');">Home</button>
-            <button onclick="redirect('{{ url_for('resume') }}');">Resume</button>
-            <button onclick="redirect('{{ url_for('sample') }}');">Writing Sample</button>
-            <button onclick="redirect('{{ url_for('job')  }}');">Job Description</button>
-            <button onclick="redirect('{{ url_for('letter') }}');">Cover Letter</button>
+            <button onclick="redirect('{{ url_for('home') }}');" onmouseover="prefetch('{{ url_for('home') }}')">Home</button>
+            <button onclick="redirect('{{ url_for('resume') }}');" onmouseover="prefetch('{{ url_for('resume') }}')">Resume</button>
+            <button onclick="redirect('{{ url_for('sample') }}');" onmouseover="prefetch('{{ url_for('sample') }}')">Writing Sample</button>
+            <button onclick="redirect('{{ url_for('job')  }}');" onmouseover="prefetch('{{ url_for('job') }}')">Job Description</button>
+            <button onclick="redirect('{{ url_for('letter') }}');" onmouseover="prefetch('{{ url_for('letter') }}')">Cover Letter</button>
         </div>
     </nav>
     <main>
