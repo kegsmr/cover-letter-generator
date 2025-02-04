@@ -35,7 +35,7 @@
 
     <div class="footer-buttons">
         <button onclick="redirect('{{ url_for('job') }}')">Back</button>
-        <button id="save-btn" onclick="saveAndExit()">Save & Exit</button>
+        <button id="save-btn" onclick="redirect('{{ url_for('home') }}')">Done</button>
     </div>
 
     <script>
@@ -47,29 +47,29 @@
             element.style.height = (element.scrollHeight) + 'px';
         }
 
-		function redirect(url) {
-            const letterContent = document.getElementById("letter-edit-input").value;
-            const formData = new FormData();
-            formData.append("letter", letterContent);
+		// function redirect(url) {
+        //     const letterContent = document.getElementById("letter-edit-input").value;
+        //     const formData = new FormData();
+        //     formData.append("letter", letterContent);
 
-			showLoadingScreen("Saving...")
+		// 	showLoadingScreen("Saving...")
 
-            fetch("{{ url_for('letter') }}?redirect=" + url, {
-                method: "POST",
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = url;
-                } else {
-                    alert("Error saving your cover letter.");
-                }
-            })
-            .catch(error => {
-                console.error("Error saving letter:", error);
-                alert("Error saving your cover letter.");
-            });
-        }
+        //     fetch("{{ url_for('letter') }}?redirect=" + url, {
+        //         method: "POST",
+        //         body: formData
+        //     })
+        //     .then(response => {
+        //         if (response.ok) {
+        //             window.location.href = url;
+        //         } else {
+        //             alert("Error saving your cover letter.");
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error("Error saving letter:", error);
+        //         alert("Error saving your cover letter.");
+        //     });
+        // }
 
         function regenerateCoverLetter() {
 
@@ -99,7 +99,7 @@
             });
         }
 
-        function saveAndExit() {
+        function redirect(url) {
             const letterContent = document.getElementById("letter-edit-input").value;
             const formData = new FormData();
             formData.append("letter", letterContent);
@@ -112,7 +112,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    window.location.href = "{{ url_for('home') }}";
+                    window.location.href = url;
                 } else {
                     alert("Error saving your cover letter.");
                 }

@@ -494,7 +494,9 @@ def letter_save():
 			save_id = session["loaded"]
 
 	write_user_file(letter, user_id, "letter.md")
-	save(save_path, resume, job, letter, title=title, save_id=save_id)
+	save_path = save(save_path, resume, job, letter, title=title, save_id=save_id)
+
+	session["loaded"] = os.path.split(save_path)[1]
 
 	return redirect("/home")
 
