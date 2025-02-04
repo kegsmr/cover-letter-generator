@@ -18,11 +18,16 @@ from generator import *
 
 app = Flask(__name__)
 
-limiter = Limiter(
-	app=app, 
-	key_func=get_remote_address,
-	default_limits=["60 per minute"]
-)
+limiter_options = {"default_limits": ["60 per minute"]}
+limiter_options_path = "limiter.json"
+if not os.path.exists(limiter_options_path):
+	with open(limiter_options_path, "w", encoding="utf-8") as limiter_options_file:
+		json.dump(limiter_options, limiter_options_file, indent=4)
+else:
+	with open(limiter_options_path, "r", encoding="utf-8") as limiter_options_file:
+		for key, value in json.load(limiter_options_file).items():
+			limiter_options[key] = value
+limiter = Limiter(app=app, key_func=get_remote_address, **limiter_options)
 
 session_options = {"secret_key": os.urandom(24).hex(), "lifetime": 30}
 session_options_path = "session.json"
@@ -571,6 +576,12 @@ def letter_load(save_id):
 def status():
 
 	return {"status": get_user_status(get_user_id(session), "Hang tight...")}
+
+
+@limiter.request_filter
+def limiter_request_filter():
+
+    return request.remote_addr == "127.0.0.1"
 
 
 if __name__ == "__main__":
