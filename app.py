@@ -7,7 +7,7 @@ import random
 import re
 import shutil
 
-from flask import Flask, render_template, redirect, request, session, url_for, send_from_directory
+from flask import Flask, render_template as flask_render_template, redirect, request, session, url_for, send_from_directory
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -33,6 +33,18 @@ else:
 			session_options[key] = value
 app.secret_key = bytes.fromhex(session_options["secret_key"])
 app.permanent_session_lifetime = timedelta(days=session_options["lifetime"])
+
+ads_options = {"client": "", "publisher": ""}
+ads_options_path = "ads.json"
+if not os.path.exists(ads_options_path):
+	with open(ads_options_path, "w", encoding="utf-8") as ads_options_file:
+		json.dump(ads_options, ads_options_file, indent=4)
+else:
+	with open(ads_options_path, "r", encoding="utf-8") as ads_options_file:
+		for key, value in json.load(ads_options_file).items():
+			ads_options[key] = value
+google_ads_client = ads_options["client"]
+google_ads_publisher = ads_options["publisher"]
 
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
@@ -157,6 +169,10 @@ def get_user_status(user_id, default=None):
 	return user_status.get(user_id, default)
 
 
+def render_template(template_name_or_list, **context):
+	return flask_render_template(template_name_or_list, google_ads_client=google_ads_client, **context)
+
+
 @app.before_request
 def make_session_permanent():
 	session.permanent = True
@@ -186,6 +202,15 @@ def serve_challenge(filename):
 	else:
 		challenge_directory = os.path.join(os.getcwd(), '.well-known', 'acme-challenge')
 		return send_from_directory(challenge_directory, filename)
+
+
+@app.route("/ads.txt")
+def serve_ads_txt():
+	if google_ads_publisher:
+		ads_content = f"google.com, {google_ads_publisher}, DIRECT, f08c47fec0942fa0"
+		return ads_content, 200, {"Content-Type": "text/plain"}
+	else:
+		return {"error", "Page not found."}, 404
 
 
 @app.route("/")
