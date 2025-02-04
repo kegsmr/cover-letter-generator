@@ -222,12 +222,6 @@ def make_session_permanent():
 	session.permanent = True
 
 
-# @app.after_request
-# def add_cors_headers(response):
-# 	response.headers['Access-Control-Allow-Origin'] = '*'
-# 	return response
-
-
 @app.errorhandler(404)
 def not_found_error(error):
 	return render_template('error.html', error_message="Page not found"), 404
@@ -411,7 +405,7 @@ def job():
 			try:
 				job_posting = get_job_posting(url, callback=lambda message: set_user_status(user_id, message))
 			except Exception as e:
-				job_posting = f"Unable to fetch job description.\n\nYou can still copy and paste it manually." + f"\n\nERROR:\n{e}" if user_id == LOCAL_USER_ID else ""
+				job_posting = f"Unable to fetch job description.\n\nYou can still copy and paste it manually." + f"\n\nERROR:\n{e}" if app.debug else ""
 
 			write_user_file(job_posting, user_id, "job.md")
 
