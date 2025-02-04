@@ -19,7 +19,7 @@ app = Flask(__name__)
 limiter = Limiter(
 	app=app, 
 	key_func=get_remote_address,
-	default_limits=["60 per minute"]
+	default_limits=["120 per minute"]
 )
 
 session_options = {"secret_key": os.urandom(24).hex(), "lifetime": 30}
@@ -253,7 +253,7 @@ def home():
 
 
 @app.route("/resume", methods=["GET", "POST"])
-@limiter.limit(lambda: "6 per minute" if request.method == "POST" and "resume" in request.files else None)
+@limiter.limit(lambda: "6 per minute" if request.method == "POST" and "resume" in request.files and request.files["resume"].filename else None)
 def resume():
 
 	user_id = get_user_id(session)
