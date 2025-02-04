@@ -173,6 +173,13 @@ def render_template(template_name_or_list, **context):
 	return flask_render_template(template_name_or_list, google_ads_client=google_ads_client, **context)
 
 
+def get_loaded_id(user_id, job) -> str:
+	if "loaded" in session:
+		if job == read_user_file(user_id, os.path.join("saved", session["loaded"], "job.md")):
+			return session["loaded"]
+	return ""
+
+
 @app.before_request
 def make_session_permanent():
 	session.permanent = True
@@ -468,8 +475,16 @@ def letter_generate():
 
 	# print(examples)
 	
-	write_user_file(pick_job_title(job), user_id, "title.md")
-	write_user_file(generate(examples, resume, job, comments=session["feedback"], callback=lambda message: set_user_status(user_id, message)), user_id, "letter.md")
+	title = pick_job_title(job)
+	letter = generate(examples, resume, job, comments=session["feedback"], callback=lambda message: set_user_status(user_id, message))
+
+	write_user_file(title, user_id, "title.md")
+	write_user_file(letter, user_id, "letter.md")
+
+	save_id = get_loaded_id(user_id, job)
+
+	save_path = save(save_path, resume, job, letter, title=title, save_id=save_id)
+	session["loaded"] = os.path.split(save_path)[1]
 
 	set_user_status(user_id)
 
@@ -488,10 +503,7 @@ def letter_save():
 	job = read_user_file(user_id, "job.md")
 	letter = request.form["letter"]
 	
-	save_id = ""
-	if "loaded" in session:
-		if job == read_user_file(user_id, os.path.join("saved", session["loaded"], "job.md")):
-			save_id = session["loaded"]
+	save_id = get_loaded_id(user_id, job)
 
 	write_user_file(letter, user_id, "letter.md")
 	save_path = save(save_path, resume, job, letter, title=title, save_id=save_id)

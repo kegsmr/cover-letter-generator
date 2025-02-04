@@ -73,6 +73,8 @@
 
         function regenerateCoverLetter() {
 
+			document.getElementById("letter-edit-input").dataset.modified = "false"
+
             const feedback = document.getElementById("inline-feedback").value;
             const formData = new FormData();
             
@@ -100,27 +102,39 @@
         }
 
         function redirect(url) {
-            const letterContent = document.getElementById("letter-edit-input").value;
-            const formData = new FormData();
-            formData.append("letter", letterContent);
+			
+			const textarea = document.getElementById("letter-edit-input");
 
-			showLoadingScreen("Saving...")
+			if (textarea.dataset.modified === "false") {
 
-            fetch("{{ url_for('letter_save') }}", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = url;
-                } else {
-                    alert("Error saving your cover letter.");
-                }
-            })
-            .catch(error => {
-                console.error("Error saving letter:", error);
-                alert("Error saving your cover letter.");
-            });
+				window.location.href = url;
+       	 		return;
+			
+			} else {
+
+				const letterContent = textarea.value;
+				const formData = new FormData();
+				formData.append("letter", letterContent);
+
+				showLoadingScreen("Saving...")
+
+				fetch("{{ url_for('letter_save') }}", {
+					method: "POST",
+					body: formData
+				})
+				.then(response => {
+					if (response.ok) {
+						textarea.dataset.modified = "false";
+						window.location.href = url;
+					} else {
+						alert("Error saving your cover letter.");
+					}
+				})
+				.catch(error => {
+					console.error("Error saving letter:", error);
+					alert("Error saving your cover letter.");
+				});
+			}
         }
 
 		// Event listener to regenerate letter on "Enter" key press when feedback input is focused
@@ -143,5 +157,9 @@
 		onBackspace(function() {
 			redirect('{{ url_for('job') }}');
 		});
+
+		window.onload = function() {
+			document.querySelectorAll("textarea").forEach(watchInput);
+		};
     </script>
 {% endblock %}

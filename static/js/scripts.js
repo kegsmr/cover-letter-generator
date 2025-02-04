@@ -129,3 +129,23 @@ function onBackspace(callback) {
         }
     });
 }
+
+function watchInput(element) {
+    // Initialize dataset.modified if not already set
+    if (!element.dataset.modified) {
+        element.dataset.modified = "false";
+    }
+
+    // Listen for input events to mark the content as modified
+    element.addEventListener("input", function () {
+        this.dataset.modified = "true";
+    });
+
+    // Listen for the beforeunload event to warn if content is modified
+    window.addEventListener("beforeunload", function (event) {
+        if (element.dataset.modified === "true") {
+            event.preventDefault();
+			// redirect("/home")
+        }
+    });
+}

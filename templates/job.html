@@ -38,12 +38,14 @@
     <!-- JavaScript to submit the job description and then trigger letter generation -->
     <script>
 		document.getElementById("job-form-submit").addEventListener("click", function(event) {
+
 			event.preventDefault();
 
 			let form = document.getElementById("job-form");
 			let urlInput = document.getElementById("url").value.trim(); // Trim to remove leading/trailing spaces
 
 			if (urlInput.length > 1) {
+				document.getElementById("markdown-input").dataset.modified = "false"
 				showLoadingScreen("Fetching job description...");
 				form.hidden = true
 				form.style.display = 'none'; 
@@ -54,59 +56,45 @@
 			}
 		});
 
-        function redirect(url) {
+		function redirect(url) {
+			const textarea = document.getElementById("markdown-input");
 
-            // Get the job description from the textarea
-            // let jobContent = document.getElementById("markdown-input").value;
-            // let jobFormData = new FormData();
-            // jobFormData.append("job", jobContent);
+			// If dataset.modified is not set or is "false", redirect immediately
+			if (textarea.dataset.modified === "false") {
+				window.location.href = url;
+				return;
+			} else {
+				// Otherwise, proceed with saving
+				const textareaContent = textarea.value;
+				document.getElementById("job_content").value = textareaContent;
 
-			// Update the hidden input with the content of the textarea
-            const textareaContent = document.getElementById("markdown-input").value;
-            document.getElementById("job_content").value = textareaContent;
+				let form = document.getElementById("job-form");
+				form.action = form.action + "?redirect=" + encodeURIComponent(url);
 
-            // Now submit the form
-            let form = document.getElementById("job-form");
-			form.action = form.action + "?redirect=" + encodeURIComponent(url);
+				showLoadingScreen("Saving...");
 
-			showLoadingScreen("Saving...")
+				form.hidden = true;
+				form.style.display = "none";
+				document.body.appendChild(form);
 
-			form.hidden = true
-			form.style.display = 'none'; 
-			document.body.appendChild(form);
-			form.submit()
+				// Reset modified flag after form submission
+				textarea.dataset.modified = "false";
 
-            // First, submit the job description to the /job route
-            // fetch("{{ url_for('job') }}", {
-            //     method: "POST",
-            //     body: jobFormData
-            // })
-            // .then(response => {
-            //     if (response.ok) {
-            //         // After successful job submission, create and submit a hidden form to POST to /letter/generate
-            //         let form = document.createElement("form");
-            //         form.method = "POST";
-            //         form.action = "{{ url_for('letter_generate') }}";
-            //         document.body.appendChild(form);
-            //         form.submit();
-            //     } else {
-            //         alert("Error submitting job description.");
-            //     }
-            // })
-			// // .then(window.location.href = "{{ url_for('letter') }}")
-            // .catch(error => {
-            //     console.error("Error submitting job:", error);
-            // });
-        }
+				form.submit();
+			}
+		}
 
 		function generate() {
 
 			// Update the hidden input with the content of the textarea
-            const textareaContent = document.getElementById("markdown-input").value;
+			const textarea = document.getElementById("markdown-input");
+            const textareaContent = textarea.value;
             document.getElementById("job_content").value = textareaContent;
 
 			let form = document.getElementById("job-form");
 			form.action = form.action + "?redirect=" + encodeURIComponent("/letter/generate");
+
+			textarea.dataset.modified = "false";
 
 			showLoadingScreen("Our job experts are currently crafting your cover letter...");
 
@@ -124,5 +112,9 @@
 		onBackspace(function() {
 			redirect('{{ url_for('sample') }}');
 		});
+
+		window.onload = function() {
+			document.querySelectorAll("textarea").forEach(watchInput);
+		};
     </script>
 {% endblock %}

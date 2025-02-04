@@ -15,22 +15,37 @@
     </div>
 
     <script>
-        function redirect(url) {
+		function redirect(url) {
 
-            let sample = document.getElementById("sample-input").value;
-			let form = document.getElementById("sample-form")
+			const textarea = document.getElementById("sample-input");
 
-			form.action = form.action + "?redirect=" + encodeURIComponent(url);
+			// If dataset.modified is not set or is "false", redirect immediately
+			if (textarea.dataset.modified === "false") {
 
-            document.getElementById("hidden-sample").value = sample;
+				window.location.href = url;
+				return;
 
-            showLoadingScreen("Saving...")
+			} else {
 
-			form.hidden = true
-			form.style.display = 'none'; 
-			document.body.appendChild(form);
-			form.submit()
-        }
+				// Otherwise, proceed with saving
+				let sampleContent = textarea.value;
+				document.getElementById("hidden-sample").value = sampleContent;
+
+				let form = document.getElementById("sample-form");
+				form.action = form.action + "?redirect=" + encodeURIComponent(url);
+
+				showLoadingScreen("Saving...");
+
+				form.hidden = true;
+				form.style.display = "none";
+				document.body.appendChild(form);
+
+				// Reset modified flag after form submission
+				textarea.dataset.modified = "false";
+
+				form.submit();
+			}
+		}
 
 		onEnter(function() {
 			redirect('{{ url_for('job') }}');
@@ -39,6 +54,10 @@
 		onBackspace(function() {
 			redirect('{{ url_for('resume') }}');
 		});
+
+		window.onload = function() {
+			document.querySelectorAll("textarea").forEach(watchInput);
+		};
     </script>
 
 {% endblock %}
