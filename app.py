@@ -7,6 +7,7 @@ import random
 import re
 import shutil
 import hashlib
+from functools import lru_cache
 
 from flask import Flask, render_template as flask_render_template, redirect, request, session, url_for, send_from_directory, Response
 from flask_limiter import Limiter
@@ -201,6 +202,7 @@ def render_template(template, **context):
 	return response
 
 
+@lru_cache(maxsize=128)
 def get_etag(data):
 	try:
 		serialized_data = json.dumps(data, sort_keys=True, default=str)  # Ensure consistent order
