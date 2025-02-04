@@ -149,3 +149,10 @@ function watchInput(element) {
         }
     });
 }
+
+function prefetch(url) {
+    var link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.href = url;
+    document.head.appendChild(link);
+}

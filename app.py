@@ -6,8 +6,9 @@ import time
 import random
 import re
 import shutil
+import hashlib
 
-from flask import Flask, render_template as flask_render_template, redirect, request, session, url_for, send_from_directory
+from flask import Flask, render_template as flask_render_template, redirect, request, session, url_for, send_from_directory, Response
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -19,7 +20,7 @@ app = Flask(__name__)
 limiter = Limiter(
 	app=app, 
 	key_func=get_remote_address,
-	default_limits=["120 per minute"]
+	default_limits=["60 per minute"]
 )
 
 session_options = {"secret_key": os.urandom(24).hex(), "lifetime": 30}
@@ -121,6 +122,14 @@ def get_user_file(user_id, path="", mode="r", encoding="utf-8"):
 		return None
 	
 
+def get_user_file_mtime(user_id, path=""):
+	user_path = get_user_path(user_id, path)
+	if user_path:
+		return os.path.getmtime(get_user_path(user_id, path))
+	else:
+		return None
+	
+
 def read_user_file(user_id, path="", fix_spacing=True, **kwargs):
 	file = get_user_file(user_id, path, **kwargs)
 	if file:
@@ -169,8 +178,32 @@ def get_user_status(user_id, default=None):
 	return user_status.get(user_id, default)
 
 
-def render_template(template_name_or_list, **context):
-	return flask_render_template(template_name_or_list, google_ads_client=google_ads_client, **context)
+def render_template(template, **context):
+
+	if google_ads_client:
+		context.setdefault("google_ads_client", google_ads_client)
+
+	etag = get_etag({"template": template, "context": context})
+
+	if etag and request.headers.get('If-None-Match').strip("\"") == etag:
+		return Response(status=304)
+
+	print(f"\"{etag}\" != {request.headers.get('If-None-Match')}")
+
+	response = Response(flask_render_template(template, **context))
+
+	if etag:
+		response.set_etag(etag)
+
+	return response
+
+
+def get_etag(data):
+	try:
+		serialized_data = json.dumps(data, sort_keys=True, default=str)  # Ensure consistent order
+		return hashlib.md5(serialized_data.encode()).hexdigest()  # Generate hash
+	except Exception:
+		return None
 
 
 def get_loaded_id(user_id, job) -> str:

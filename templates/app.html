@@ -16,15 +16,18 @@
 			const menu = document.querySelector('.navbar-menu');
 			menu.classList.toggle('show');
 		}
+
+		window.addEventListener('load', function() {
+			prefetch('/home');
+			prefetch('/resume');
+			prefetch('/sample');
+			prefetch('/job');
+			prefetch('/letter');
+		});
 	</script>
 	{% if google_ads_client %}
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ google_ads_client }}" crossorigin="anonymous"></script>
 	{% endif %}
-	<link rel="prefetch" href="/home">
-	<link rel="prefetch" href="/resume">
-	<link rel="prefetch" href="/sample">
-	<link rel="prefetch" href="/job">
-	<link rel="prefetch" href="/letter">
 </head>
 <body>
     <nav>
