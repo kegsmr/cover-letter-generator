@@ -233,8 +233,6 @@ def resume():
 	
 	if request.method == "GET":
 
-		set_user_status(user_id)
-
 		# Get the user's resume text (if it exists)
 		r = read_user_file(user_id, "resume.md")
 		return render_template("resume.html", resume=r)
@@ -272,6 +270,8 @@ def resume():
 
 			# Delete the temporary file
 			os.remove(filename)
+
+			set_user_status(user_id)
 
 			# After processing the file, render with the resume text
 			return render_template("resume.html", resume=resume)
@@ -324,8 +324,6 @@ def job():
 
 	if request.method == "GET":
 
-		set_user_status(user_id)
-
 		job_posting = read_user_file(user_id, "job.md")
 
 		return render_template("job.html", job=job_posting)
@@ -345,6 +343,8 @@ def job():
 				job_posting = f"Unable to fetch job description.\n\nYou can still copy and paste it manually." + f"\n\nERROR:\n{e}" if user_id == LOCAL_USER_ID else ""
 
 			write_user_file(job_posting, user_id, "job.md")
+
+			set_user_status(user_id)
 
 			return render_template("job.html", job=job_posting)
 
@@ -420,7 +420,6 @@ def letter():
 def letter_generate():
 
 	user_id = get_user_id(session)
-	set_user_status(user_id)
 
 	if request.method == "POST":
 		if "feedback" in request.form:
@@ -444,6 +443,8 @@ def letter_generate():
 	
 	write_user_file(pick_job_title(job), user_id, "title.md")
 	write_user_file(generate(examples, resume, job, comments=session["feedback"], callback=lambda message: set_user_status(user_id, message)), user_id, "letter.md")
+
+	set_user_status(user_id)
 
 	return redirect("/letter") #{"success": ""} 
 
