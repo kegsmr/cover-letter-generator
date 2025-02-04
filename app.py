@@ -184,11 +184,14 @@ def render_template(template, **context):
 		context.setdefault("google_ads_client", google_ads_client)
 
 	etag = get_etag({"template": template, "context": context})
+	client_etag = request.headers.get('If-None-Match')
+	
+	if etag and client_etag:
+		client_etag = client_etag.strip("\"")
+		if etag == client_etag:
+			return Response(status=304)
 
-	if etag and request.headers.get('If-None-Match').strip("\"") == etag:
-		return Response(status=304)
-
-	print(f"\"{etag}\" != {request.headers.get('If-None-Match')}")
+	# print(f"{etag} != {client_etag}")
 
 	response = Response(flask_render_template(template, **context))
 
