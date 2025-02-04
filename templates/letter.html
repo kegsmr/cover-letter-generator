@@ -122,5 +122,18 @@
                 alert("Error saving your cover letter.");
             });
         }
+
+		// Event listener to regenerate letter on "Enter" key press when feedback input is focused
+		const feedbackInput = document.getElementById('inline-feedback');
+    
+		// Focus event to trigger regeneration when the input is focused
+		feedbackInput.addEventListener('focus', function() {
+			feedbackInput.addEventListener('keydown', function(event) {
+				if (event.key === 'Enter') {
+					event.preventDefault();  // Prevent the default action of "Enter" key (like form submission)
+					regenerateCoverLetter(); // Call regenerate function when "Enter" is pressed
+				}
+			});
+		});
     </script>
 {% endblock %}
