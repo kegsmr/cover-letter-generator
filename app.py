@@ -202,7 +202,6 @@ def render_template(template, **context):
 	return response
 
 
-@lru_cache(maxsize=128)
 def get_etag(data):
 	try:
 		serialized_data = json.dumps(data, sort_keys=True, default=str)  # Ensure consistent order
