@@ -429,3 +429,72 @@ a:hover {
     color: white; /* Ensure text stays white on hover */
     text-decoration: none; /* Prevent underline on hover */
 }
+
+/* General Navbar Styles */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333;
+	justify-content: space-evenly;
+}
+
+nav button {
+    color: white;
+    background: none;
+    border: none;
+    padding: 15px 30px;
+    cursor: pointer;
+    font-size: 16px;
+	white-space: nowrap; /* Prevent the text from wrapping to a new line */
+    text-overflow: ellipsis; /* Add ellipsis if the text is too long */
+}
+
+/* Hide the menu by default on small screens */
+.navbar-menu {
+    display: flex;
+    gap: 10px;
+}
+
+/* The hamburger menu (will be shown on mobile) */
+.hamburger {
+    display: none;
+    font-size: 30px;
+    background: none;
+    color: white;
+    border: none;
+	max-width: 90px;
+}
+
+/* Make the menu responsive */
+@media (max-width: 768px) {
+	nav {
+		justify-content: flex-start;
+	}
+
+    .navbar-menu {
+        display: none; /* Hide the menu on mobile by default */
+        flex-direction: column;
+        width: 100%;
+        background-color: #333;
+		/*position: absolute; /* Make the navbar menu absolute */
+        /*top: 50px; /* Position it below the hamburger icon */
+        /*left: 0; /* Align it to the left edge of the screen */
+        /*z-index: 999; /* Ensure the menu appears above other elements */
+    }
+
+    .navbar-menu.show {
+        display: flex; /* Show the menu when hamburger is clicked */
+    }
+
+    .hamburger {
+        display: block; /* Show hamburger icon on mobile */
+    }
+
+    .navbar-menu button {
+        width: 100%;
+        padding: 15px;
+        text-align: center;
+    }
+}

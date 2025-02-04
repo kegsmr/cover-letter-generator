@@ -9,7 +9,7 @@
     <div id="content">
 
         <form id="resume-form" method="POST" enctype="multipart/form-data" style="margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 10px;">
-            <input type="file" name="resume" accept=".pdf, .docx, .txt" id="resume" style="flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
+            <input type="file" name="resume" accept=".pdf, .docx, .txt" id="resume" style="flex-grow: 1; max-width: calc(100% - 100px); padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
 
             <!-- Hidden input to store the content of the textarea -->
             <input type="hidden" name="resume_content" id="resume_content">

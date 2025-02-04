@@ -11,6 +11,11 @@
 			showLoadingScreen("Just a moment...")
 			window.location.href=url
 		};
+
+		function toggleMenu() {
+			const menu = document.querySelector('.navbar-menu');
+			menu.classList.toggle('show');
+		}
 	</script>
 	{% if google_ads_client %}
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ google_ads_client }}" crossorigin="anonymous"></script>
@@ -18,11 +23,17 @@
 </head>
 <body>
     <nav>
-        <button onclick="redirect('{{ url_for('home') }}');">Home</button>
-		<button onclick="redirect('{{ url_for('resume') }}');">Resume</button>
-		<button onclick="redirect('{{ url_for('sample') }}');">Writing Sample</button>
-		<button onclick="redirect('{{ url_for('job')  }}');">Job Description</button>
-		<button onclick="redirect('{{ url_for('letter') }}');">Cover Letter</button>
+        <!-- Hamburger Icon for Mobile -->
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        
+        <!-- Navbar Menu (Hidden on Mobile) -->
+        <div class="navbar-menu">
+            <button onclick="redirect('{{ url_for('home') }}');">Home</button>
+            <button onclick="redirect('{{ url_for('resume') }}');">Resume</button>
+            <button onclick="redirect('{{ url_for('sample') }}');">Writing Sample</button>
+            <button onclick="redirect('{{ url_for('job')  }}');">Job Description</button>
+            <button onclick="redirect('{{ url_for('letter') }}');">Cover Letter</button>
+        </div>
     </nav>
     <main>
         <section id="content">
