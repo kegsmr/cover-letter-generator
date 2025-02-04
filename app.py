@@ -581,7 +581,7 @@ def status():
 @limiter.request_filter
 def limiter_request_filter():
 
-    return request.remote_addr == "127.0.0.1"
+    return app.debug
 
 
 if __name__ == "__main__":
