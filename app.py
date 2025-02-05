@@ -223,18 +223,24 @@ def get_loaded_id(user_id, job) -> str:
 	return ""
 
 
-def error(e, path=""):
-	with open("error.log", "a") as error_file:
-		error_file.write(f"{datetime.now().strftime('[%H:%M:%S]')} {path} {e}\n")
+def log_error(request, e):
+	with open("error.log", "a") as file:
+		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {request.remote_addr} - \"{request.method} {request.path}\" - \"{e}\"\n")
+
+
+def log_access(request):
+	with open("access.log", "a") as file:
+		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {request.remote_addr} - \"{request.method} {request.path}\"\n")
 
 
 @app.before_request
-def make_session_permanent():
+def before_request():
+	log_access(request)
 	session.permanent = True
 
 
 @app.after_request
-def add_headers(response):
+def after_request(response):
 	response.cache_control.private = True
 	response.cache_control.max_age = 5
 	response.cache_control.must_revalidate = True
@@ -244,7 +250,7 @@ def add_headers(response):
 @app.errorhandler(404)
 def not_found_error(e):
 
-	error(e, request.path)
+	log_error(request, e)
 
 	return render_template('error.html', error_message="Page not found"), 404
 
@@ -252,7 +258,7 @@ def not_found_error(e):
 @app.errorhandler(500)
 def internal_server_error(e):
 
-	error(e, request.path)
+	log_error(request, e)
 
 	return render_template('error.html', error_message="Internal server error, please try again later."), 500
 
