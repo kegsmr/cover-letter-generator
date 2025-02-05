@@ -225,8 +225,9 @@ def get_loaded_id(user_id, job) -> str:
 
 def log_error(request, e):
 	user_id = session.get("user_id", "")
+	error = e.code if hasattr(e, 'code') else e
 	with open("error.log", "a") as file:
-		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {user_id if user_id else request.remote_addr} - \"{request.method} {request.path}\" - \"{e}\"\n")
+		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {user_id if user_id else request.remote_addr} - \"{request.method} {request.path}\" - \"{error}\"\n")
 
 
 def log_access(request):
