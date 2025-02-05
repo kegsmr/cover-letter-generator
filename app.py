@@ -224,13 +224,15 @@ def get_loaded_id(user_id, job) -> str:
 
 
 def log_error(request, e):
+	user_id = session.get("user_id", "")
 	with open("error.log", "a") as file:
-		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {request.remote_addr} - \"{request.method} {request.path}\" - \"{e}\"\n")
+		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {user_id if user_id else request.remote_addr} - \"{request.method} {request.path}\" - \"{e}\"\n")
 
 
 def log_access(request):
+	user_id = session.get("user_id", "")
 	with open("access.log", "a") as file:
-		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {request.remote_addr} - \"{request.method} {request.path}\"\n")
+		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {user_id if user_id else request.remote_addr} - \"{request.method} {request.path}\"\n")
 
 
 @app.before_request
@@ -248,19 +250,21 @@ def after_request(response):
 
 
 @app.errorhandler(404)
-def not_found_error(e):
-
+def error_404(e):
 	log_error(request, e)
-
 	return render_template('error.html', error_message="Page not found"), 404
 
 
 @app.errorhandler(500)
-def internal_server_error(e):
-
+def error_500(e):
 	log_error(request, e)
-
 	return render_template('error.html', error_message="Internal server error, please try again later."), 500
+
+
+@app.errorhandler(Exception)
+def error_generic(e):
+    log_error(request, e)
+    return render_template('error.html', error_message="An unexpected error occurred, please try again later."), 500
 
 
 @app.route('/.well-known/acme-challenge/<filename>')
