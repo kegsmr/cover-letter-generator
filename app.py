@@ -360,10 +360,12 @@ def resume():
 @app.route("/sample", methods=["GET", "POST"])
 def sample():
 
+	user_id = get_user_id(session)
+
 	if request.method == "GET":
 
-		s = read_user_file(get_user_id(session), "sample.md")
-		return render_template("sample.html", sample=s)
+		s = read_user_file(user_id, "sample.md")
+		return render_template("sample.html", sample=s, back=("/home" if get_user_jobs(user_id) else "/resume"))
 
 	else:
 
@@ -371,7 +373,7 @@ def sample():
 
 			url = request.args.get('redirect')
 
-			write_user_file(request.form["sample"], get_user_id(session), "sample.md")
+			write_user_file(request.form["sample"], user_id, "sample.md")
 
 			return redirect(url)
 		
@@ -390,7 +392,7 @@ def job():
 
 		job_posting = read_user_file(user_id, "job.md")
 
-		return render_template("job.html", job=job_posting)
+		return render_template("job.html", job=job_posting, back=("/home" if get_user_jobs(user_id) else "/sample"))
 
 	else:
 
@@ -410,7 +412,7 @@ def job():
 
 			set_user_status(user_id)
 
-			return render_template("job.html", job=job_posting)
+			return render_template("job.html", job=job_posting, back=("/home" if get_user_jobs(user_id) else "/sample"))
 
 		elif "job_content" in request.form:
 
