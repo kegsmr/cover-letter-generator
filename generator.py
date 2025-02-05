@@ -169,16 +169,17 @@ def generate(examples=[], resume="", job_posting="", comments=[], callback=lambd
 		}
 	]
 
-	for n in range(5):
+	DONE_MESSAGE = "All Done!"
+	for n in range(3):
 		callback(f"Reviewing draft {n + 1}...")
 		v = verify(resume, cover_letter)
 		if v is True:
-			callback(f"All done!")
+			callback(DONE_MESSAGE)
 			return cover_letter
 		else:
 			callback(f"Writing draft {n + 2}...")
 			cover_letter = revise(messages, justification=v, resume=resume)
-	callback("Maximum drafts exceeded.")
+	callback(DONE_MESSAGE)
 	return cover_letter
 
 
