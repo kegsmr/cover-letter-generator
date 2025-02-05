@@ -17,13 +17,20 @@
 			<li>
 				<a href="{{ url_for('sample') }}">Edit Writing Sample</a>
 			</li>
+			<li>
+				<a href="{{ url_for('export') }}">Download your data</a>
+			</li>
+			<li>
+				<a href="{{ url_for('delete') }}" onclick="return confirm('Are you sure you want to delete all your data?\n\nThis action cannot be undone.');">Delete your data</a>
+			</li>
 		</ul>
 		<br>
-		<h2>Your Cover Letters</h2>
+		<br>
+		<h2 id="letters">Your Cover Letters</h2>
 		<ul>
 			{% for id, name in jobs %}
 				<li>
-					<a href="/letter/load/{{ id }}">{{ name }}</a>
+					<a href="/letter/load/{{ id }}">{{ name }}</a> <span style="font-size: smaller;">(<a style="color: red;" href="/letter/delete/{{ id }}">Delete</a>)</span>
 				</li>
 			{% endfor %}
 		</ul>

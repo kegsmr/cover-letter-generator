@@ -8,6 +8,7 @@ import re
 import shutil
 import hashlib
 from functools import lru_cache
+import zipfile
 
 from flask import Flask, render_template as flask_render_template, redirect, request, session, url_for, send_from_directory, Response
 from flask_limiter import Limiter
@@ -559,13 +560,65 @@ def letter_load(save_id):
 	return redirect("/letter")
 
 
-#TODO letter delete
+@app.route("/letter/delete/<save_id>")
+def letter_delete(save_id):
+
+	user_id = get_user_id(session)
+	directory = get_user_path(user_id, os.path.join("saved", save_id))
+
+	shutil.rmtree(directory)
+
+	return redirect(f"/home#letters")
 
 
 @app.route("/status")
 def status():
 
 	return {"status": get_user_status(get_user_id(session), "Hang tight...")}
+
+
+@app.route("/export")
+@limiter.limit("6 per minute")
+def export():
+
+    user_id = get_user_id(session)
+    user_path = get_user_path(user_id)
+    
+    if not user_path or not os.path.exists(user_path):
+        return {"error": "User data not found."}, 404
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as temp_zip:
+        with zipfile.ZipFile(temp_zip.name, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, _, files in os.walk(user_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, user_path)
+                    zipf.write(file_path, arcname)
+    
+        temp_zip_path = temp_zip.name
+    
+    return send_from_directory(os.path.dirname(temp_zip_path), os.path.basename(temp_zip_path), as_attachment=True, download_name=f"cover-letter-generator-{datetime.now().strftime('%Y%m%d%H%M%S')}.zip")
+
+
+@app.route("/delete")
+def delete():
+
+    user_id = get_user_id(session)
+    user_path = get_user_path(user_id)
+    
+    if not user_path or not os.path.exists(user_path):
+        return {"error": "User data not found."}, 404
+	
+    try:
+
+        shutil.rmtree(user_path)
+        session.pop("user_id", None)  # Remove user session
+
+        return redirect("/home") #{"message": "User data deleted successfully."}, 200
+	
+    except Exception as e:
+
+        return {"error": f"Failed to delete user data: {str(e)}"}, 500
 
 
 @limiter.request_filter
