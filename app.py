@@ -508,41 +508,55 @@ def letter():
 def letter_generate():
 
 	user_id = get_user_id(session)
+	save_path = os.path.join(database_path, user_id, "saved")
 
+	# POST method used for regenerating cover letter with feedback
 	if request.method == "POST":
 		if "feedback" in request.form:
 			feedback = request.form["feedback"]
 			if feedback:
 				session["feedback"].append(feedback)
 
+	# Read files from user directory
 	resume = read_user_file(user_id, "resume.md")
 	job = read_user_file(user_id, "job.md")
 	sample = read_user_file(user_id, "sample.md")
 
+	# Save old cover letter if regenerating (so that the modified cover letter can be an example for Ollama)
+	if request.method == "POST":
+		letter = read_user_file(user_id, "letter.md")
+		title = read_user_file(user_id, "title.md")
+		if letter and title:
+			save_id = get_loaded_id(user_id, job)
+			save_path = save(save_path, resume, job, letter, title=title, save_id=save_id)
+			session["loaded"] = os.path.split(save_path)[1]
+
+	# Use sample (if exists) and saved cover letters as examples for Ollama
 	examples = []
 	if sample:
 		examples += [(resume, "No job description provided.", sample)]
-	save_path = os.path.join(database_path, user_id, "saved")
 	if os.path.exists(save_path):
 		for directory in os.listdir(save_path):
 			examples += [load(os.path.join(save_path, directory))]
-
 	# print(examples)
 	
+	# Use Ollama to generate the job title and cover letter
 	title = pick_job_title(job)
 	letter = generate(examples, resume, job, comments=session["feedback"], callback=lambda message: set_user_status(user_id, message))
 
+	# Write files in user directory
 	write_user_file(title, user_id, "title.md")
 	write_user_file(letter, user_id, "letter.md")
 
+	# Save new cover letter in `saved` directory (use loaded save ID if job description is the same)
 	save_id = get_loaded_id(user_id, job)
-
 	save_path = save(save_path, resume, job, letter, title=title, save_id=save_id)
 	session["loaded"] = os.path.split(save_path)[1]
 
+	# Reset user status so it doesn't leak into future loading screens
 	set_user_status(user_id)
 
-	return redirect("/letter") #{"success": ""} 
+	return redirect("/letter")
 
 
 @app.route("/letter/save", methods=["POST"])
