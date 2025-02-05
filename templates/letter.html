@@ -77,12 +77,17 @@
 
 			document.getElementById("letter-edit-input").dataset.modified = "false"
 
+			const textarea = document.getElementById("letter-edit-input");
             const feedback = document.getElementById("inline-feedback").value;
             const formData = new FormData();
             
             if (feedback.trim().length > 0) {
                 formData.append("feedback", feedback);
             }
+
+			if (textarea.dataset.modified) {
+				formData.append("letter", textarea.value)
+			}
 
 			showLoadingScreen("We all make mistakes...");
             

@@ -525,12 +525,14 @@ def letter_generate():
 
 	# Save old cover letter if regenerating (so that the modified cover letter can be an example for Ollama)
 	if request.method == "POST":
-		letter = read_user_file(user_id, "letter.md")
-		title = read_user_file(user_id, "title.md")
-		if letter and title:
-			save_id = get_loaded_id(user_id, job)
-			save_path = save(save_path, resume, job, letter, title=title, save_id=save_id)
-			session["loaded"] = os.path.split(save_path)[1]
+		if "letter" in request.form:
+			letter = request.form["letter"]
+			title = read_user_file(user_id, "title.md")
+			if letter and title:
+				save_id = get_loaded_id(user_id, job)
+				path = save(save_path, resume, job, letter, title=title, save_id=save_id)
+				write_user_file(letter, user_id, "letter.md")
+				session["loaded"] = os.path.split(path)[1]
 
 	# Use sample (if exists) and saved cover letters as examples for Ollama
 	examples = []
@@ -551,8 +553,8 @@ def letter_generate():
 
 	# Save new cover letter in `saved` directory (use loaded save ID if job description is the same)
 	save_id = get_loaded_id(user_id, job)
-	save_path = save(save_path, resume, job, letter, title=title, save_id=save_id)
-	session["loaded"] = os.path.split(save_path)[1]
+	path = save(save_path, resume, job, letter, title=title, save_id=save_id)
+	session["loaded"] = os.path.split(path)[1]
 
 	# Reset user status so it doesn't leak into future loading screens
 	set_user_status(user_id)
