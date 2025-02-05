@@ -24,10 +24,10 @@
 
         <div style="display: flex; gap: 10px;">
             <!-- Left: Textarea (Editor) -->
-            <textarea id="markdown-input" style="flex: 1; min-height: 570px;">{{ resume }}</textarea>
+            <textarea id="markdown-input" style="flex: 1; min-height: calc(100vh - 350px); padding-bottom: 0px; margin-bottom: 0px;">{{ resume }}</textarea>
 
             <!-- Right: Preview -->
-            <div id="markdown-preview" class="preview" style="flex: 1; min-height: 570px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
+            <div id="markdown-preview" class="preview" style="flex: 1; min-height: calc(100vh - 350px); overflow-y: auto; border: 1px solid #ccc; padding: 10px; padding-bottom: 0px;"></div>
         </div>
 
     </div>
