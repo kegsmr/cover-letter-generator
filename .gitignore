@@ -1,6 +1,8 @@
 __pycache__
 database
 
+*.log
+
 resume.pdf
 session.json
 deploy.bat
