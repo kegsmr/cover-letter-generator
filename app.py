@@ -531,7 +531,7 @@ def letter_generate():
 			if letter and title:
 				save_id = get_loaded_id(user_id, job)
 				path = save(save_path, resume, job, letter, title=title, save_id=save_id)
-				write_user_file(letter, user_id, "letter.md")
+				# write_user_file(letter, user_id, "letter.md")
 				session["loaded"] = os.path.split(path)[1]
 
 	# Use sample (if exists) and saved cover letters as examples for Ollama
@@ -540,7 +540,8 @@ def letter_generate():
 		examples += [(resume, "No job description provided.", sample)]
 	if os.path.exists(save_path):
 		for directory in os.listdir(save_path):
-			examples += [load(os.path.join(save_path, directory))]
+			if read_user_file(user_id, "letter.md") != read_user_file(user_id, os.path.join(save_path, directory, "letter.md")): # This way a cover letter for the same job only loads as an example if the user modified it
+				examples += [load(os.path.join(save_path, directory))]
 	# print(examples)
 	
 	# Use Ollama to generate the job title and cover letter
