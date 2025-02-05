@@ -223,7 +223,7 @@ def get_loaded_id(user_id, job) -> str:
 	return ""
 
 
-def error(path, e):
+def error(e, path=""):
 	with open("error.log", "a") as error_file:
 		error_file.write(f"{datetime.now().strftime('[%H:%M:%S]')} {path} {e}\n")
 
@@ -244,7 +244,7 @@ def add_headers(response):
 @app.errorhandler(404)
 def not_found_error(e):
 
-	error(request.path, e)
+	error(e, request.path)
 
 	return render_template('error.html', error_message="Page not found"), 404
 
@@ -252,7 +252,7 @@ def not_found_error(e):
 @app.errorhandler(500)
 def internal_server_error(e):
 
-	error(request.path, e)
+	error(e, request.path)
 
 	return render_template('error.html', error_message="Internal server error, please try again later."), 500
 
