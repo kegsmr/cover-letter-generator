@@ -284,8 +284,10 @@ def home():
 			url = "/resume"
 		elif not get_user_path(user_id, "sample.md") or not read_user_file(user_id, "sample.md"):
 			url = "/sample"
-		else:
+		elif not get_user_path(user_id, "job.md") or not read_user_file(user_id, "job.md"):
 			url = "/job"
+		else:
+			url = "/letter"
 		return render_template("welcome.html", url=url)
 
 
