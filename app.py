@@ -19,7 +19,7 @@ from generator import *
 
 app = Flask(__name__)
 
-limiter_options = {"default_limits": ["60 per minute"]}
+limiter_options = {"enabled": True, "default_limits": ["60 per minute"]}
 limiter_options_path = "limiter.json"
 if not os.path.exists(limiter_options_path):
 	with open(limiter_options_path, "w", encoding="utf-8") as limiter_options_file:
@@ -28,6 +28,7 @@ else:
 	with open(limiter_options_path, "r", encoding="utf-8") as limiter_options_file:
 		for key, value in json.load(limiter_options_file).items():
 			limiter_options[key] = value
+limiter_enabled = limiter_options.pop("enabled")
 limiter = Limiter(app=app, key_func=get_remote_address, **limiter_options)
 
 session_options = {"secret_key": os.urandom(24).hex(), "lifetime": 30}
@@ -671,7 +672,7 @@ def delete():
 @limiter.request_filter
 def limiter_request_filter():
 
-    return app.debug
+    return app.debug or not limiter_enabled
 
 
 if __name__ == "__main__":
