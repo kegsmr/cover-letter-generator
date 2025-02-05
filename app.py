@@ -275,7 +275,7 @@ def index():
 def home():
 
 	user_id = get_user_id(session)
-	jobs = get_user_jobs()
+	jobs = get_user_jobs(user_id)
 
 	if jobs:
 		return render_template("dashboard.html", jobs=jobs)
