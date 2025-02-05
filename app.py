@@ -545,6 +545,7 @@ def letter_load(save_id):
 
 	session["loaded"] = save_id
 
+	save_id = sanitize_directory_name(save_id)
 	user_id = get_user_id(session)
 
 	title = read_user_file(user_id, os.path.join("saved", save_id, "title.md"))
@@ -563,10 +564,15 @@ def letter_load(save_id):
 @app.route("/letter/delete/<save_id>")
 def letter_delete(save_id):
 
+	save_id = sanitize_directory_name(save_id)
 	user_id = get_user_id(session)
+
 	directory = get_user_path(user_id, os.path.join("saved", save_id))
 
 	shutil.rmtree(directory)
+
+	if session["loaded"] == save_id:
+		session.pop("loaded")
 
 	return redirect(f"/home#letters")
 
