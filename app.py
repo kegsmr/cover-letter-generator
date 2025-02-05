@@ -267,23 +267,26 @@ def serve_ads_txt():
 
 @app.route("/")
 def index():
+
 	return redirect("/home")
-	# user_id = get_user_id(session)
-	# if not get_user_path(user_id, "resume.md"):
-	# 	return redirect("/welcome")
-	# if not get_user_jobs(user_id):
-	# 	return redirect("/job")
-	# else:
-	# 	return redirect("/home")
 
 
 @app.route("/home")
 def home():
-	jobs = get_user_jobs(get_user_id(session))
+
+	user_id = get_user_id(session)
+	jobs = get_user_jobs()
+
 	if jobs:
 		return render_template("dashboard.html", jobs=jobs)
 	else:
-		return render_template("welcome.html")
+		if not get_user_path(user_id, "resume.md") or not read_user_file(user_id, "resume.md"):
+			url = "/resume"
+		elif not get_user_path(user_id, "sample.md") or not read_user_file(user_id, "sample.md"):
+			url = "/sample"
+		else:
+			url = "/job"
+		return render_template("welcome.html", url=url)
 
 
 @app.route("/resume", methods=["GET", "POST"])
