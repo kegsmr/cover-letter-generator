@@ -512,6 +512,7 @@ def letter_generate():
 	save_path = os.path.join(database_path, user_id, "saved")
 
 	# POST method used for regenerating cover letter with feedback
+	feedback = ""
 	if request.method == "POST":
 		if "feedback" in request.form:
 			feedback = request.form["feedback"]
@@ -540,9 +541,9 @@ def letter_generate():
 		examples += [(resume, "No job description provided.", sample)]
 	if os.path.exists(save_path):
 		for directory in os.listdir(save_path):
-			# if read_user_file(user_id, "letter.md") != read_user_file(user_id, os.path.join(save_path, directory, "letter.md")): # This way a cover letter for the same job only loads as an example if the user modified it
-			examples += [load(os.path.join(save_path, directory))]
-	# print(examples)
+			if feedback or read_user_file(user_id, "letter.md") != read_user_file(user_id, os.path.join(save_path, directory, "letter.md")):
+				examples += [load(os.path.join(save_path, directory))]
+	#print(examples)
 	
 	# Use Ollama to generate the job title and cover letter
 	title = pick_job_title(job)

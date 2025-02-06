@@ -170,7 +170,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], callback=lambd
 	]
 
 	DONE_MESSAGE = "All Done!"
-	for n in range(3):
+	for n in range(2):
 		callback(f"Reviewing draft {n + 1}...")
 		v = verify(resume, cover_letter)
 		if v is True:
