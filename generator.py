@@ -114,7 +114,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 		else:
 			lines += [
 				"",
-				"Now modify the candidate's last cover letter to fit the new job posting:",
+				"Now revise the candidate's last cover letter to fit the new job posting:",
 				"```",
 				sample,
 				"```"
@@ -181,11 +181,12 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 	]
 
 	if debug:
-		log_messages(messages)
+		clear_message_logs()
+		log_messages(messages[-2:])
 
 
 	DONE_MESSAGE = "All Done!"
-	for n in range(1, 3):
+	for n in range(1, 5):
 		callback(f"Reviewing draft {n}...")
 		feedback = validate(letter=cover_letter, resume=resume, job=job_posting, debug=debug)
 		if feedback:
@@ -274,7 +275,7 @@ def validate(letter="", resume="", job="", debug=False): #TODO compare job descr
 			letter,
 			"```",
 			"",
-			"What job requirements did the candidate reference in the cover letter that cannot be found in the job description (if any)?",
+			"What job requirements or job title did the candidate reference in the cover letter that cannot be found in the job description (if any)?",
 			"",
 			"I want to ensure that the candidate's cover letter is properly tailored to this job, and not a different job."
 		])
@@ -296,7 +297,7 @@ def validate(letter="", resume="", job="", debug=False): #TODO compare job descr
 			{
 				"role": "user",
 				"content": "\n".join([
-					"So, did the candidate reference any job requirements in the cover letter that cannot be found in the job description?",
+					"So, did the candidate reference any job requirements or job title in the cover letter that cannot be found in the job description?",
 					"",
 					"Could the candidate be confusing this job's requirments with another jobs requirments?",
 					"",
@@ -387,7 +388,7 @@ def revise(messages=[], letter="", feedback="", comments=[], debug=False):
 	}]
 
 	if debug:
-		log_messages(messages)
+		log_messages(messages[-2:])
 
 	return cover_letter \
 		.strip() \
@@ -579,24 +580,36 @@ def load(path) -> tuple:
 	return tuple(data)
 
 
+def clear_message_logs():
+
+	with open("messages.log", "w") as file:
+		file.write("")
+	with open("messages.md", "w") as file:
+		file.write("")
+
+
 def log_messages(messages: list):
 
-	global message_log_cleared
+    newlines = 3 * "\n"
+    timestamp = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
 
-	if "message_log_cleared" not in globals().keys():
-		with open("messages.log", "w") as file:
-			file.write("")
-		message_log_cleared = True
+    # Writing to messages.log (Terminal-colored format)
+    with open("messages.log", "a", encoding="utf-8") as file:
+        file.write(f"\033[1mCONVERSATION AT {timestamp}\033[0m{newlines}")
+        for message in messages:
+            role = message["role"]
+            content = re.sub(r'\n{3,}', '\n\n', message["content"]).strip()
+            color = "\033[34m" if role == "user" else "\033[32m"
+            file.write(f"{color}{role.upper()}\033[0m: {content}{newlines}")
+        file.write(100 * "-" + newlines)
 
-	with open("messages.log", "a", encoding="utf-8") as file:
-		newlines = 3 * "\n"
-		file.write(f"\033[1mCOVERSATION AT {datetime.now().strftime('%Y/%m/%d %H:%M:%S')}\033[0m{newlines}")
-		for message in messages:
-			role = message["role"]
-			content = re.sub(r'\n{3,}', '\n\n', message["content"]).strip() #.replace("\n", "\n\t")
-			color = "\033[34m" if role == "user" else "\033[32m"
-			file.write(f"{color}{role.upper()}\033[0m: {content}{newlines}")
-		file.write(100 * "-" + newlines)
+    # Writing to messages.md (Markdown formatted)
+    with open("messages.md", "a", encoding="utf-8") as file:
+        file.write(f"# Conversation at {timestamp}\n\n")
+        for message in messages:
+            role = message["role"].capitalize()
+            content = re.sub(r'\n{3,}', '\n\n', message["content"]).strip()
+            file.write(f"## {role}\n\n{content}\n\n---\n\n")
 
 
 if __name__ == "__main__":
