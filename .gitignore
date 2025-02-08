@@ -2,6 +2,7 @@ __pycache__
 database
 
 *.log
+*.bat
 
 resume.pdf
 session.json

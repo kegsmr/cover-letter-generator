@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime
 
 import ollama as o
@@ -87,7 +88,7 @@ def main():
 		print(f"Saved to `{path}`.")
 
 
-def generate(examples=[], resume="", job_posting="", comments=[], callback=lambda message: print(f"\033[90mStatus: {message}\033[90m")):
+def generate(examples=[], resume="", job_posting="", comments=[], callback=lambda message: print(f"\033[90mStatus: {message}\033[90m"), debug=False):
 	
 	messages = []
 
@@ -110,12 +111,12 @@ def generate(examples=[], resume="", job_posting="", comments=[], callback=lambd
 			lines += [
 				"", 
 				"The candidate also stated the following:",
-				"```"
+				# "```"
 			]
 
-			lines += [f"- {comment}" for comment in comments]
+			lines += [f"*   {comment.strip()}" for comment in comments]
 			
-			lines += ["```"]
+			# lines += ["```"]
 
 		lines += [
 			"",
@@ -169,21 +170,25 @@ def generate(examples=[], resume="", job_posting="", comments=[], callback=lambd
 		}
 	]
 
+	if debug:
+		log_messages(messages)
+
+
 	DONE_MESSAGE = "All Done!"
 	for n in range(2):
 		callback(f"Reviewing draft {n + 1}...")
-		v = verify(resume, cover_letter)
+		v = verify(resume, cover_letter, debug=debug)
 		if v is True:
 			callback(DONE_MESSAGE)
 			return cover_letter
 		else:
 			callback(f"Writing draft {n + 2}...")
-			cover_letter = revise(messages, justification=v, resume=resume)
+			cover_letter = revise(messages, justification=v, resume=resume, debug=debug)
 	callback(DONE_MESSAGE)
 	return cover_letter
 
 
-def verify(resume, cover_letter): #TODO compare job description to cover letter
+def verify(resume, cover_letter, debug=False): #TODO compare job description to cover letter
 
 	content = "\n".join([
 		"Read this candidate's resume:",
@@ -196,7 +201,9 @@ def verify(resume, cover_letter): #TODO compare job description to cover letter
 		cover_letter,
 		"```",
 		"",
-		"What qualifications did the candidate mention in the cover letter, but not their resume (if any)?"
+		"What qualifications did the candidate mention in the cover letter, but not their resume (if any)?",
+		"",
+		"I want to ensure that the candidate is not exaggerating their skills and/or experience." #"I suspect the candidate may be exaggerating their skills and experience."
 	])
 
 	messages = [
@@ -217,13 +224,21 @@ def verify(resume, cover_letter): #TODO compare job description to cover letter
 		},
 		{
 			"role": "user",
-			"content": "Are there any qualifications mentioned in the cover letter that aren't from the resume?\n\nReply in one word: \"Yes\" or \"No\"."
+			"content": "So, did the candidate mention any qualifications in the cover letter, but not the resume?\n\nCould they be exaggerating their skills and/or experience?\n\nReply in one word: \"Yes\" or \"No\"."
 		}
 	]
 
 	choice = ollama.chat(model, messages=messages).message.content
 
-	# print(f"Choice: {choice}")
+	messages += [
+		{
+			"role": "assistant",
+			"content": choice
+		}
+	]
+
+	if debug:
+		log_messages(messages)
 
 	if choice.lower().startswith("no"):
 		return True
@@ -231,7 +246,7 @@ def verify(resume, cover_letter): #TODO compare job description to cover letter
 		return differences
 	
 
-def revise(messages, justification, resume):
+def revise(messages, justification, resume, debug=False):
 
 	messages += [{
 		"role": "user",
@@ -244,6 +259,9 @@ def revise(messages, justification, resume):
 		"role": "assistant",
 		"content": cover_letter
 	}]
+
+	if debug:
+		log_messages(messages)
 
 	return cover_letter \
 		.strip() \
@@ -433,6 +451,26 @@ def load(path) -> tuple:
 		data.append(open(path, encoding="utf-8").read())
 
 	return tuple(data)
+
+
+def log_messages(messages: list):
+
+	global message_log_cleared
+
+	if "message_log_cleared" not in globals().keys():
+		with open("messages.log", "w") as file:
+			file.write("")
+		message_log_cleared = True
+
+	with open("messages.log", "a", encoding="utf-8") as file:
+		newlines = 3 * "\n"
+		file.write(f"\033[1mCOVERSATION AT {datetime.now().strftime('%Y/%m/%d %H:%M:%S')}\033[0m{newlines}")
+		for message in messages:
+			role = message["role"]
+			content = re.sub(r'\n{3,}', '\n\n', message["content"]).strip() #.replace("\n", "\n\t")
+			color = "\033[34m" if role == "user" else "\033[32m"
+			file.write(f"{color}{role.upper()}:\033[0m {content}{newlines}")
+		file.write(100 * "-" + newlines)
 
 
 if __name__ == "__main__":

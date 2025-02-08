@@ -543,11 +543,12 @@ def letter_generate():
 		for directory in os.listdir(save_path):
 			if feedback or read_user_file(user_id, "letter.md") != read_user_file(user_id, os.path.join(save_path, directory, "letter.md")):
 				examples += [load(os.path.join(save_path, directory))]
-	#print(examples)
+	if len(examples) > 10:
+		examples = examples[len(examples) - 10:]
 	
 	# Use Ollama to generate the job title and cover letter
 	title = pick_job_title(job)
-	letter = generate(examples, resume, job, comments=session["feedback"], callback=lambda message: set_user_status(user_id, message))
+	letter = generate(examples, resume, job, comments=session["feedback"], callback=lambda message: set_user_status(user_id, message), debug=app.debug)
 
 	# Write files in user directory
 	write_user_file(title, user_id, "title.md")
