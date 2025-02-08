@@ -185,11 +185,11 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 
 
 	DONE_MESSAGE = "All Done!"
-	for n in range(100): #for n in range(2):
-		callback(f"Reviewing draft {n + 1}...")
+	for n in range(1, 5):
+		callback(f"Reviewing draft {n}...")
 		feedback = validate(letter=cover_letter, resume=resume, job=job_posting, debug=debug)
 		if feedback:
-			callback(f"Writing draft {n + 2}...")
+			callback(f"Writing draft {n + 1}...")
 			cover_letter = revise(messages=messages, letter=cover_letter, feedback=feedback, comments=comments, debug=debug)
 		else:
 			callback(DONE_MESSAGE)
