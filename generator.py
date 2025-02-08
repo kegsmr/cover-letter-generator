@@ -185,89 +185,167 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 
 
 	DONE_MESSAGE = "All Done!"
-	for n in range(2):
+	for n in range(100): #for n in range(2):
 		callback(f"Reviewing draft {n + 1}...")
-		v = verify(resume, cover_letter, debug=debug)
-		if v is True:
+		feedback = validate(letter=cover_letter, resume=resume, job=job_posting, debug=debug)
+		if feedback:
+			callback(f"Writing draft {n + 2}...")
+			cover_letter = revise(messages=messages, letter=cover_letter, feedback=feedback, comments=comments, debug=debug)
+		else:
 			callback(DONE_MESSAGE)
 			return cover_letter
-		else:
-			callback(f"Writing draft {n + 2}...")
-			cover_letter = revise(messages, letter=cover_letter, resume=resume, comments=comments, debug=debug)
 	callback(DONE_MESSAGE)
 	return cover_letter
 
 
-def verify(resume, cover_letter, debug=False): #TODO compare job description to cover letter
+def validate(letter="", resume="", job="", debug=False): #TODO compare job description to cover letter
 
-	content = "\n".join([
-		"Read this candidate's resume:",
-		"```",
-		resume,
-		"```",
-		"",
-		"Now read the candidate's cover letter:",
-		"```",
-		cover_letter,
-		"```",
-		"",
-		"What qualifications did the candidate mention in the cover letter, but not their resume (if any)?",
-		"",
-		"I want to ensure that the candidate is not exaggerating their skills and/or experience." #"I suspect the candidate may be exaggerating their skills and experience."
-	])
+	def inconsistent_with_resume():
 
-	messages = [
-		{
-			"role": "user",
-			"content": content
-		}
-	]
+		content = "\n".join([
+			"Read this candidate's resume:",
+			"```",
+			resume,
+			"```",
+			"",
+			"Now read the candidate's cover letter:",
+			"```",
+			letter,
+			"```",
+			"",
+			"What qualifications did the candidate mention in the cover letter, but not their resume (if any)?",
+			"",
+			"I want to ensure that the candidate is not exaggerating their skills and/or experience."
+		])
 
-	differences = ollama.chat(model, messages=messages).message.content
+		messages = [
+			{
+				"role": "user",
+				"content": content
+			}
+		]
 
-	# print(f"Differences: {differences}")
+		messages += [
+			{
+				"role": "assistant",
+				"content": ollama.chat(model, messages=messages).message.content
+			},
+			{
+				"role": "user",
+				"content": "\n".join([
+					"So, did the candidate mention any qualifications in the cover letter, but not the resume?",
+					"",
+					"Could they be exaggerating their skills and/or experience to fit the job requirements?",
+					"",
+					"Reply in one word: \"Yes\" or \"No\"."
+				])
+			}
+		]
 
-	messages += [
-		{
-			"role": "assistant",
-			"content": differences
-		},
-		{
-			"role": "user",
-			"content": "So, did the candidate mention any qualifications in the cover letter, but not the resume?\n\nCould they be exaggerating their skills and/or experience?\n\nReply in one word: \"Yes\" or \"No\"."
-		}
-	]
+		choice = ollama.chat(model, messages=messages).message.content
 
-	choice = ollama.chat(model, messages=messages).message.content
+		messages += [
+			{
+				"role": "assistant",
+				"content": choice
+			}
+		]
 
-	messages += [
-		{
-			"role": "assistant",
-			"content": choice
-		}
-	]
+		if debug:
+			log_messages(messages)
 
-	if debug:
-		log_messages(messages)
+		if choice.lower().startswith("no"):
+			return False
+		else:
+			return True
 
-	if choice.lower().startswith("no"):
-		return True
-	else:
-		return differences
+	def inconsistent_with_job():
+
+		content = "\n".join([
+			"Read this job description:",
+			"```",
+			job,
+			"```",
+			"",
+			"Now read this candidate's cover letter:",
+			"```",
+			letter,
+			"```",
+			"",
+			"What job requirements did the candidate reference in the cover letter that cannot be found in the job description (if any)?",
+			"",
+			"I want to ensure that the candidate's cover letter is properly tailored to this job, and not a different job."
+		])
+
+		messages = [
+			{
+				"role": "user",
+				"content": content
+			}
+		]
+
+		messages += [
+			{
+				"role": "assistant",
+				"content": ollama.chat(model, messages=messages).message.content
+			},
+			{
+				"role": "user",
+				"content": "\n".join([
+					"So, did the candidate reference any job requirements in the cover letter that cannot be found in the job description?",
+					"",
+					"Could the candidate be confusing this job's requirments with another jobs requirments?",
+					"",
+					"Reply in one word: \"Yes\" or \"No\"."
+				])
+			}
+		]
+
+		choice = ollama.chat(model, messages=messages).message.content
+
+		messages += [
+			{
+				"role": "assistant",
+				"content": choice
+			}
+		]
+
+		if debug:
+			log_messages(messages)
+
+		if choice.lower().startswith("no"):
+			return False
+		else:
+			return True
+	
+	feedback = ""
+	if inconsistent_with_job():
+		feedback += "\n".join([
+			"",
+			"Remove any references to job requirements not found in the job description:",
+			"```",
+			job,
+			"```"
+		])
+	elif inconsistent_with_resume():
+		feedback += "\n".join([
+			"",
+			"Remove qualifications not mentioned in the resume:",
+			"```",
+			resume,
+			"```"
+		])
+	return feedback
 	
 
-def revise(messages, letter, resume, comments=[], debug=False):
+def revise(messages=[], letter="", feedback="", comments=[], debug=False):
 
 	lines = [
 		"Write a revised version of this cover letter:",
 		"```",
 		letter,
 		"```",
-		"",
-		"Remove qualifications not mentioned in the resume:",
-		"```",
-		resume,
-		"```"
+		feedback
 	]
 
 	if len(comments) > 0:
@@ -505,7 +583,7 @@ def log_messages(messages: list):
 			role = message["role"]
 			content = re.sub(r'\n{3,}', '\n\n', message["content"]).strip() #.replace("\n", "\n\t")
 			color = "\033[34m" if role == "user" else "\033[32m"
-			file.write(f"{color}{role.upper()}:\033[0m {content}{newlines}")
+			file.write(f"{color}{role.upper()}\033[0m: {content}{newlines}")
 		file.write(100 * "-" + newlines)
 
 
