@@ -185,7 +185,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 
 
 	DONE_MESSAGE = "All Done!"
-	for n in range(1, 5):
+	for n in range(1, 3):
 		callback(f"Reviewing draft {n}...")
 		feedback = validate(letter=cover_letter, resume=resume, job=job_posting, debug=debug)
 		if feedback:
@@ -200,7 +200,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 
 def validate(letter="", resume="", job="", debug=False): #TODO compare job description to cover letter
 
-	def inconsistent_with_resume():
+	def compare_resume():
 
 		content = "\n".join([
 			"Read this candidate's resume:",
@@ -225,10 +225,12 @@ def validate(letter="", resume="", job="", debug=False): #TODO compare job descr
 			}
 		]
 
+		feedback = ollama.chat(model, messages=messages).message.content
+
 		messages += [
 			{
 				"role": "assistant",
-				"content": ollama.chat(model, messages=messages).message.content
+				"content": feedback
 			},
 			{
 				"role": "user",
@@ -255,11 +257,11 @@ def validate(letter="", resume="", job="", debug=False): #TODO compare job descr
 			log_messages(messages)
 
 		if choice.lower().startswith("no"):
-			return False
+			return ""
 		else:
-			return True
+			return feedback
 
-	def inconsistent_with_job():
+	def compare_job():
 
 		content = "\n".join([
 			"Read this job description:",
@@ -284,10 +286,12 @@ def validate(letter="", resume="", job="", debug=False): #TODO compare job descr
 			}
 		]
 
+		feedback = ollama.chat(model, messages=messages).message.content
+
 		messages += [
 			{
 				"role": "assistant",
-				"content": ollama.chat(model, messages=messages).message.content
+				"content": feedback
 			},
 			{
 				"role": "user",
@@ -314,27 +318,35 @@ def validate(letter="", resume="", job="", debug=False): #TODO compare job descr
 			log_messages(messages)
 
 		if choice.lower().startswith("no"):
-			return False
+			return ""
 		else:
-			return True
+			return feedback
 	
 	feedback = ""
-	if inconsistent_with_job():
+
+	context = "\nYou should apply the following feedback in the revised cover letter:"
+
+	resume_feedback = compare_resume()
+	if resume_feedback:
 		feedback += "\n".join([
 			"",
-			"Remove any references to job requirements not found in the job description:",
+			context,
 			"```",
-			job,
+			resume_feedback,
 			"```"
 		])
-	elif inconsistent_with_resume():
+		context = ""
+
+	job_feedback = compare_job()
+	if job_feedback:
 		feedback += "\n".join([
-			"",
-			"Remove qualifications not mentioned in the resume:",
+			context,
 			"```",
-			resume,
+			job_feedback,
 			"```"
 		])
+		context = ""
+
 	return feedback
 	
 
