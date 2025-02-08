@@ -522,7 +522,7 @@ def letter_generate():
 	# Read files from user directory
 	resume = read_user_file(user_id, "resume.md")
 	job = read_user_file(user_id, "job.md")
-	sample = read_user_file(user_id, "sample.md") if len(session["feedback"]) < 1 else ""
+	sample = read_user_file(user_id, "sample.md")# if len(session["feedback"]) < 1 else ""
 
 	# Save old cover letter if regenerating (so that the modified cover letter can be an example for Ollama)
 	if request.method == "POST":

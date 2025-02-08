@@ -81,9 +81,8 @@
             
             if (feedback.trim().length > 0) {
                 formData.append("feedback", feedback);
-            }
-
-			if (textarea.dataset.modified === "true") {
+				formData.append("letter", textarea.value);
+            } else if (textarea.dataset.modified === "true") {
 				formData.append("letter", textarea.value)
 			}
 

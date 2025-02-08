@@ -105,19 +105,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 			job_posting,
 			"```"
 		]
-
-		if len(comments) > 0:
-
-			lines += [
-				"", 
-				"The candidate also stated the following:",
-				# "```"
-			]
-
-			lines += [f"*   {comment.strip()}" for comment in comments]
-			
-			# lines += ["```"]
-
+	
 		if not sample: # or len(comments) > 0:
 			lines += [
 				"",
@@ -131,6 +119,16 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 				sample,
 				"```"
 			]
+
+		if len(comments) > 0:
+
+			lines += [
+				"", 
+				"The candidate also stated the following:",
+				# "```"
+			]
+
+			lines += [f"*   {comment.strip()}" for comment in comments]
 
 		lines += [
 			"",
