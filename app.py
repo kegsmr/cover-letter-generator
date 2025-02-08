@@ -535,10 +535,10 @@ def letter_generate():
 				# write_user_file(letter, user_id, "letter.md")
 				session["loaded"] = os.path.split(path)[1]
 
-	# Use sample (if exists) and saved cover letters as examples for Ollama
+	# Use saved cover letters as examples for Ollama
 	examples = []
-	if sample:
-		examples += [(resume, "No job description provided.", sample)]
+	# if sample:
+	# 	examples += [(resume, "No job description provided.", sample)]
 	if os.path.exists(save_path):
 		for directory in os.listdir(save_path):
 			if feedback or read_user_file(user_id, "letter.md") != read_user_file(user_id, os.path.join(save_path, directory, "letter.md")):
@@ -548,7 +548,7 @@ def letter_generate():
 	
 	# Use Ollama to generate the job title and cover letter
 	title = pick_job_title(job)
-	letter = generate(examples, resume, job, comments=session["feedback"], callback=lambda message: set_user_status(user_id, message), debug=app.debug)
+	letter = generate(examples, resume, job, comments=session["feedback"], sample=sample, callback=lambda message: set_user_status(user_id, message), debug=app.debug)
 
 	# Write files in user directory
 	write_user_file(title, user_id, "title.md")

@@ -88,7 +88,7 @@ def main():
 		print(f"Saved to `{path}`.")
 
 
-def generate(examples=[], resume="", job_posting="", comments=[], callback=lambda message: print(f"\033[90mStatus: {message}\033[90m"), debug=False):
+def generate(examples=[], resume="", job_posting="", comments=[], sample="", callback=lambda message: print(f"\033[90mStatus: {message}\033[90m"), debug=False):
 	
 	messages = []
 
@@ -118,9 +118,21 @@ def generate(examples=[], resume="", job_posting="", comments=[], callback=lambd
 			
 			# lines += ["```"]
 
+		if not sample:
+			lines += [
+				"",
+				"Now write the candidate's cover letter based on their resume and the job posting.",
+			]
+		else:
+			lines += [
+				"",
+				"Now modify the candidate's last cover letter to fit the new job posting. Here is the cover letter to modify:",
+				"```",
+				sample,
+				"```"
+			]
+		
 		lines += [
-			"",
-			"Now write the candidate's cover letter based on their resume and the job posting.",
 			"",
 			"Reply ONLY with the cover letter, no commentary!"
 		]
