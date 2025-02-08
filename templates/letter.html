@@ -75,8 +75,6 @@
 
         function regenerateCoverLetter() {
 
-			document.getElementById("letter-edit-input").dataset.modified = "false"
-
 			const textarea = document.getElementById("letter-edit-input");
             const feedback = document.getElementById("inline-feedback").value;
             const formData = new FormData();
@@ -85,9 +83,11 @@
                 formData.append("feedback", feedback);
             }
 
-			if (textarea.dataset.modified) {
+			if (textarea.dataset.modified === "true") {
 				formData.append("letter", textarea.value)
 			}
+
+			document.getElementById("letter-edit-input").dataset.modified = "false"
 
 			showLoadingScreen("We all make mistakes...");
             

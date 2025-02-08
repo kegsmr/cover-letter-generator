@@ -118,7 +118,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 			
 			# lines += ["```"]
 
-		if not sample:
+		if not sample: # or len(comments) > 0:
 			lines += [
 				"",
 				"Now write the candidate's cover letter based on their resume and the job posting.",
@@ -126,12 +126,12 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 		else:
 			lines += [
 				"",
-				"Now modify the candidate's last cover letter to fit the new job posting. Here is the cover letter to modify:",
+				"Now modify the candidate's last cover letter to fit the new job posting:",
 				"```",
 				sample,
 				"```"
 			]
-		
+
 		lines += [
 			"",
 			"Reply ONLY with the cover letter, no commentary!"
@@ -195,7 +195,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 			return cover_letter
 		else:
 			callback(f"Writing draft {n + 2}...")
-			cover_letter = revise(messages, justification=v, resume=resume, debug=debug)
+			cover_letter = revise(messages, letter=cover_letter, resume=resume, comments=comments, debug=debug)
 	callback(DONE_MESSAGE)
 	return cover_letter
 
@@ -258,11 +258,37 @@ def verify(resume, cover_letter, debug=False): #TODO compare job description to 
 		return differences
 	
 
-def revise(messages, justification, resume, debug=False):
+def revise(messages, letter, resume, comments=[], debug=False):
+
+	lines = [
+		"Write a revised version of this cover letter:",
+		"```",
+		letter,
+		"```",
+		"",
+		"Remove qualifications not mentioned in the resume:",
+		"```",
+		resume,
+		"```"
+	]
+
+	if len(comments) > 0:
+
+		lines += [
+			"", 
+			"The candidate also stated the following:",
+		]
+
+		lines += [f"*   {comment.strip()}" for comment in comments]
+
+	lines += [
+		"",
+		"Reply ONLY with the cover letter, no commentary!"
+	]
 
 	messages += [{
 		"role": "user",
-		"content": f"Write a revised version of the cover letter.\n\nRemove qualifications not mentioned in the resume:\n```\n{resume}\n```\n\nReply ONLY with the cover letter, no commentary!"
+		"content": "\n".join(lines)
 	}]
 
 	cover_letter = ollama.chat(model, messages=messages).message.content

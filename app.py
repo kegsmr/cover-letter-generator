@@ -522,18 +522,21 @@ def letter_generate():
 	# Read files from user directory
 	resume = read_user_file(user_id, "resume.md")
 	job = read_user_file(user_id, "job.md")
-	sample = read_user_file(user_id, "sample.md")
+	sample = read_user_file(user_id, "sample.md") if len(session["feedback"]) < 1 else ""
 
 	# Save old cover letter if regenerating (so that the modified cover letter can be an example for Ollama)
 	if request.method == "POST":
 		if "letter" in request.form:
+			# print("Using modified letter as sample...")
 			letter = request.form["letter"]
-			title = read_user_file(user_id, "title.md")
-			if letter and title:
-				save_id = get_loaded_id(user_id, job)
-				path = save(save_path, resume, job, letter, title=title, save_id=save_id)
-				# write_user_file(letter, user_id, "letter.md")
-				session["loaded"] = os.path.split(path)[1]
+			sample = letter
+			# letter = request.form["letter"]
+			# title = read_user_file(user_id, "title.md")
+			# if letter and title:
+			# 	save_id = get_loaded_id(user_id, job)
+			# 	path = save(save_path, resume, job, letter, title=title, save_id=save_id)
+			# 	# write_user_file(letter, user_id, "letter.md")
+			# 	session["loaded"] = os.path.split(path)[1]
 
 	# Use saved cover letters as examples for Ollama
 	examples = []
@@ -541,8 +544,9 @@ def letter_generate():
 	# 	examples += [(resume, "No job description provided.", sample)]
 	if os.path.exists(save_path):
 		for directory in os.listdir(save_path):
-			if feedback or read_user_file(user_id, "letter.md") != read_user_file(user_id, os.path.join(save_path, directory, "letter.md")):
-				examples += [load(os.path.join(save_path, directory))]
+			# if read_user_file(user_id, "letter.md") != read_user_file(user_id, os.path.join(save_path, directory, "letter.md")):
+			# # if feedback or read_user_file(user_id, "letter.md") != read_user_file(user_id, os.path.join(save_path, directory, "letter.md")):
+			examples += [load(os.path.join(save_path, directory))]
 	if len(examples) > 10:
 		examples = examples[len(examples) - 10:]
 	
