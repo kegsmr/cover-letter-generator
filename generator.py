@@ -88,7 +88,7 @@ def main():
 		print(f"Saved to `{path}`.")
 
 
-def generate(examples=[], resume="", job_posting="", comments=[], sample="", callback=lambda message: print(f"\033[90mStatus: {message}\033[90m"), debug=False):
+def generate(examples=[], resume="", job_posting="", comments=[], sample="", callback=lambda message: print(f"\033[90mStatus: {message}\033[90m"), debug=False, log_path="messages.md"):
 	
 	messages = []
 
@@ -180,18 +180,16 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 		}
 	]
 
-	if debug:
-		clear_message_logs()
-		log_messages(messages[-2:])
-
+	clear_message_logs(log_path=log_path, debug=debug)
+	log_messages(messages[-2:], title="Generate", log_path=log_path, debug=debug)
 
 	DONE_MESSAGE = "All Done!"
 	for n in range(1, 5):
 		callback(f"Reviewing draft {n}...")
-		feedback = validate(letter=cover_letter, resume=resume, job=job_posting, debug=debug)
+		feedback = validate(letter=cover_letter, resume=resume, job=job_posting, debug=debug, log_path=log_path)
 		if feedback:
 			callback(f"Writing draft {n + 1}...")
-			cover_letter = revise(messages=messages, letter=cover_letter, feedback=feedback, comments=comments, debug=debug)
+			cover_letter = revise(messages=messages, letter=cover_letter, feedback=feedback, comments=comments, debug=debug, log_path=log_path)
 		else:
 			callback(DONE_MESSAGE)
 			return cover_letter
@@ -199,7 +197,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 	return cover_letter
 
 
-def validate(letter="", resume="", job="", debug=False): #TODO compare job description to cover letter
+def validate(letter="", resume="", job="", debug=False, log_path=""): #TODO compare job description to cover letter
 
 	def compare_resume():
 
@@ -254,8 +252,7 @@ def validate(letter="", resume="", job="", debug=False): #TODO compare job descr
 			}
 		]
 
-		if debug:
-			log_messages(messages)
+		log_messages(messages, title="Compare Resume", log_path=log_path, debug=debug)
 
 		if choice.lower().startswith("no"):
 			return ""
@@ -315,8 +312,7 @@ def validate(letter="", resume="", job="", debug=False): #TODO compare job descr
 			}
 		]
 
-		if debug:
-			log_messages(messages)
+		log_messages(messages, title="Compare Job Description", log_path=log_path, debug=debug)
 
 		if choice.lower().startswith("no"):
 			return ""
@@ -351,7 +347,7 @@ def validate(letter="", resume="", job="", debug=False): #TODO compare job descr
 	return feedback
 	
 
-def revise(messages=[], letter="", feedback="", comments=[], debug=False):
+def revise(messages=[], letter="", feedback="", comments=[], debug=False, log_path=""):
 
 	lines = [
 		"Write a revised version of this cover letter:",
@@ -387,8 +383,7 @@ def revise(messages=[], letter="", feedback="", comments=[], debug=False):
 		"content": cover_letter
 	}]
 
-	if debug:
-		log_messages(messages[-2:])
+	log_messages(messages[-2:], title="Revise", log_path=log_path, debug=debug)
 
 	return cover_letter \
 		.strip() \
@@ -580,36 +575,40 @@ def load(path) -> tuple:
 	return tuple(data)
 
 
-def clear_message_logs():
+def clear_message_logs(log_path="messages.md", debug=False):
 
-	with open("messages.log", "w") as file:
+	if debug:
+		with open("messages.log", "w") as file:
+			file.write("")
+	with open(log_path, "w") as file:
 		file.write("")
-	with open("messages.md", "w") as file:
-		file.write("")
 
 
-def log_messages(messages: list):
+def log_messages(messages: list, title="", log_path="messages.md", debug=False):
 
-    newlines = 3 * "\n"
-    timestamp = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+	newlines = 3 * "\n"
+	timestamp = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
 
-    # Writing to messages.log (Terminal-colored format)
-    with open("messages.log", "a", encoding="utf-8") as file:
-        file.write(f"\033[1mCONVERSATION AT {timestamp}\033[0m{newlines}")
-        for message in messages:
-            role = message["role"]
-            content = re.sub(r'\n{3,}', '\n\n', message["content"]).strip()
-            color = "\033[34m" if role == "user" else "\033[32m"
-            file.write(f"{color}{role.upper()}\033[0m: {content}{newlines}")
-        file.write(100 * "-" + newlines)
+	# print(f"Writing to {os.path.abspath(log_path)}")
 
-    # Writing to messages.md (Markdown formatted)
-    with open("messages.md", "a", encoding="utf-8") as file:
-        file.write(f"# Conversation at {timestamp}\n\n")
-        for message in messages:
-            role = message["role"].capitalize()
-            content = re.sub(r'\n{3,}', '\n\n', message["content"]).strip()
-            file.write(f"## {role}\n\n{content}\n\n---\n\n")
+	# Writing to messages.log (Terminal-colored format)
+	if debug:
+		with open("messages.log", "a", encoding="utf-8") as file:
+			file.write(f"\033[1mCONVERSATION AT {timestamp}\033[0m{newlines}")
+			for message in messages:
+				role = message["role"]
+				content = re.sub(r'\n{3,}', '\n\n', message["content"]).strip()
+				color = "\033[34m" if role == "user" else "\033[32m"
+				file.write(f"{color}{role.upper()}\033[0m: {content}{newlines}")
+			file.write(100 * "-" + newlines)
+
+	# Writing to messages.md (Markdown formatted)
+	with open(log_path, "a", encoding="utf-8") as file:
+		file.write(f"# {timestamp} - {title}\n\n" if title else f"# {timestamp}\n\n")
+		for message in messages:
+			role = message["role"].capitalize()
+			content = re.sub(r'\n{3,}', '\n\n', message["content"]).strip()
+			file.write(f"## {role}\n\n{content}\n\n---\n\n")
 
 
 if __name__ == "__main__":

@@ -109,12 +109,12 @@ def get_user_id(s) -> str:
 	return new_user_id
 
 
-def get_user_path(user_id, path="") -> str:
+def get_user_path(user_id, path="", missing_ok=False) -> str:
 	user_path = os.path.join(database_path, user_id)
 	os.makedirs(user_path, exist_ok=True)
 	if path:
 		user_path = os.path.join(user_path, path)
-		if os.path.exists(user_path):
+		if missing_ok or os.path.exists(user_path):
 			return user_path
 		else:
 			return None
@@ -265,8 +265,11 @@ def error_500(e):
 
 @app.errorhandler(Exception)
 def error_generic(e):
-    log_error(request, e)
-    return render_template('error.html', error_message="An unexpected error occurred, please try again later."), 500
+	if app.debug:
+		raise e
+	else:
+		log_error(request, e)
+		return render_template('error.html', error_message="An unexpected error occurred, please try again later."), 500
 
 
 @app.route('/.well-known/acme-challenge/<filename>')
@@ -550,9 +553,20 @@ def letter_generate():
 	if len(examples) > 10:
 		examples = examples[len(examples) - 10:]
 	
+	# Clear logs
+	write_user_file("# Nothing here yet...", user_id, "messages.md")
+
 	# Use Ollama to generate the job title and cover letter
 	title = pick_job_title(job)
-	letter = generate(examples, resume, job, comments=session["feedback"], sample=sample, callback=lambda message: set_user_status(user_id, message), debug=app.debug)
+	letter = generate(examples, 
+				   resume, 
+				   job, 
+				   comments=session["feedback"], 
+				   sample=sample, 
+				   callback=lambda message: set_user_status(user_id, message), 
+				   debug=app.debug, 
+				   log_path=get_user_path(user_id, "messages.md", missing_ok=True)
+				)
 
 	# Write files in user directory
 	write_user_file(title, user_id, "title.md")
@@ -626,6 +640,12 @@ def letter_delete(save_id):
 		session.pop("loaded")
 
 	return redirect(f"/home#letters")
+
+
+@app.route("/letter/messages")
+def letter_messages():
+
+	return render_template("messages.html", messages=read_user_file(get_user_id(session), "messages.md"))
 
 
 @app.route("/status")

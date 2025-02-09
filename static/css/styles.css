@@ -504,3 +504,34 @@ nav button {
         display: none;
     }
 }
+
+.extra-message {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	background-color: #f1f1f1; /* Optional: change background color */
+	text-align: center;
+	padding: 10px;
+	box-shadow: 0 -2px 5px rgba(0,0,0,0.2); /* Optional: add shadow */
+}
+
+.extra-message a {
+	text-decoration: none; /* Removes underline */
+	color: #3498db; /* Lighter blue color */
+}
+
+.extra-message a:hover {
+	color: #6fb2df; /* Optional: change color on hover */
+}
+
+.view-log-button {
+    padding: 6px 10px;
+    white-space: nowrap; /* Prevents text from wrapping */
+	max-width: 160px;
+}
+
+.copy-button {
+    padding: 6px 10px;
+    white-space: nowrap; /* Prevents text from wrapping */
+}

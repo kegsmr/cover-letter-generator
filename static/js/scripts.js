@@ -89,11 +89,12 @@ function hideLoadingOverlay(overlay, targetElementId) {
 }
 
 // Create and insert the loading screen into the document
-function showLoadingScreen(defaultMessage = "Getting ready...") {
+function showLoadingScreen(defaultMessage="Getting ready...", extraMessage="") {
     document.body.innerHTML = `
         <div class="loading-container">
             <div class="spinner"></div>
             <div class="status-message">${defaultMessage}</div>
+			${extraMessage}
         </div>
     `;
 

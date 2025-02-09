@@ -4,13 +4,19 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script defer src="/static/js/markdown-editor.js"></script>
 
-    <h1 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">{{ title }}</h1>
-    
+	<h1 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">{{ title }}</h1>
+
     <!-- Cover Letter Section -->
     <div class="content-item">
-        <h2>Your Cover Letter:</h2>
-        <textarea id="letter-edit-input" style="min-height: calc(100vh - 362px); margin-bottom: 5px;" oninput="resizeTextarea(this)">{{ letter }}</textarea>
-    </div>
+		<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+			<h2>Your Cover Letter:</h2>
+			<div style="display: flex; gap: 8px;">
+				<button onclick="window.open('letter/messages', '_blank')" class="view-log-button hide-on-mobile">View message log</button>
+				<button onclick="navigator.clipboard.writeText(document.getElementById('letter-edit-input').value)" class="copy-button hide-on-mobile">Copy to clipboard</button>
+			</div>
+		</div>
+		<textarea id="letter-edit-input" style="min-height: calc(100vh - 362px); margin-bottom: 5px;" oninput="resizeTextarea(this)">{{ letter }}</textarea>
+	</div>	
 
     <!-- Feedback Form (Minimized Gap) -->
     <div class="button-container" style="display: flex; gap: 8px; align-items: center; margin-top: 0;">
@@ -24,12 +30,12 @@
     <div class="generated-content" style="display: flex; gap: 10px; margin-top: 15px; margin-bottom: 0;">
         <div class="content-item" style="flex: 1;">
             <h2>Your Resume:</h2>
-            <div class="preview" id="resume" style="min-height: calc(100vh - 162px);">{{ resume }}</div>
+            <div class="preview markdown-body" id="resume" style="min-height: calc(100vh - 162px);">{{ resume }}</div>
         </div>
 
         <div class="content-item" style="flex: 1;">
             <h2>Job Description:</h2>
-            <div class="preview" id="job-description" style="min-height: calc(100vh - 162px);">{{ job }}</div>
+            <div class="preview markdown-body" id="job-description" style="min-height: calc(100vh - 162px);">{{ job }}</div>
         </div>
     </div>
 
@@ -88,7 +94,7 @@
 
 			document.getElementById("letter-edit-input").dataset.modified = "false"
 
-			showLoadingScreen("We all make mistakes...");
+			showLoadingScreen("We all make mistakes...", '<div class="extra-message"><button onclick="window.open(\'letter/messages\', \'_blank\')" class="view-log-button">View message log</button></div>');
             
             fetch("{{ url_for('letter_generate') }}", {
                 method: "POST",

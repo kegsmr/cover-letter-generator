@@ -1,0 +1,73 @@
+{% extends "app.html" %}
+
+{% block content %}
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script defer src="/static/js/markdown-editor.js"></script>
+    
+    <style>
+        nav {display: none;}
+
+        main {
+            background-color: white;
+        }
+
+        pre, code {
+            white-space: pre-wrap !important;  /* Ensures wrapping */
+            word-wrap: break-word !important;  /* Breaks long words */
+            overflow-wrap: break-word !important;  /* Alternative for word breaks */
+        }
+
+        pre {
+            max-height: 400px;
+            overflow: auto; /* Allows scrolling */
+            word-break: break-word !important; /* Breaks long words */
+        }
+
+        .markdown-body {
+            max-width: 80%;
+            margin: auto;
+        }
+    </style>
+
+    <div class="markdown-body" id="messages">{{ messages }}</div>
+    
+    <script>
+        const messagesElement = document.getElementById('messages');
+        let lastContent = messagesElement.innerHTML.trim();
+
+        messagesElement.innerHTML = marked.parse(lastContent);
+
+        function reloadOnUpdate(interval = 3000) {
+
+            async function checkForUpdates() {
+                try {
+                    let response = await fetch(window.location.href, { cache: "no-store" });
+                    let html = await response.text();
+
+                    let parser = new DOMParser();
+                    let doc = parser.parseFromString(html, 'text/html');
+                    let newContent = doc.getElementById('messages').innerHTML.trim();
+
+                    // Compare the raw content of #messages
+                    if (newContent !== lastContent) {
+                        lastContent = newContent;  // Update lastContent to the new content
+                        location.reload();  // Reload if content has changed
+                    }
+                } catch (error) {
+                    console.error("Error checking for updates:", error);
+                }
+            }
+
+            setInterval(checkForUpdates, interval);
+        }
+
+        // Scroll to the bottom of the page after the DOM content is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+			setTimeout(function() {
+				window.scrollTo(0, document.documentElement.scrollHeight);
+			}, 100);
+        });
+
+        reloadOnUpdate();
+    </script>
+{% endblock %}
