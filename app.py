@@ -567,6 +567,8 @@ def letter_generate():
 				   debug=app.debug, 
 				   log_path=get_user_path(user_id, "messages.md", missing_ok=True)
 				)
+	
+	write_user_file("# Done", user_id, "messages.md", mode="a")
 
 	# Write files in user directory
 	write_user_file(title, user_id, "title.md")
