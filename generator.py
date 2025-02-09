@@ -184,7 +184,7 @@ def generate(examples=[], resume="", job_posting="", comments=[], sample="", cal
 	log_messages(messages[-2:], title="Generate", log_path=log_path, debug=debug)
 
 	DONE_MESSAGE = "All Done!"
-	for n in range(1, 5):
+	for n in range(1, 3):
 		callback(f"Reviewing draft {n}...")
 		feedback = validate(letter=cover_letter, resume=resume, job=job_posting, debug=debug, log_path=log_path)
 		if feedback:
