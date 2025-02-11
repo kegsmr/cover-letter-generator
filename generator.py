@@ -611,5 +611,32 @@ def log_messages(messages: list, title="", log_path="messages.md", debug=False):
 			file.write(f"## {role}\n\n{content}\n\n---\n\n")
 
 
+def name_from_resume(resume: str) -> str:
+
+	messages = [
+		{
+			"role": "user",
+			"content": "Please get this person's first name using their resume.\n\n" \
+				"```\n" \
+				f"{resume}\n" \
+				"```\n\n" \
+				"Reply ONLY with their first name, no commentary!"
+		}
+	]
+
+	reply = ollama.chat(model=BASE_MODEL, messages=messages) \
+		.message \
+		.content \
+
+	if len(reply.split()) > 1:
+		return ""
+
+	name = reply \
+		.lower() \
+		.capitalize()
+
+	return name
+
+
 if __name__ == "__main__":
 	main()

@@ -232,9 +232,18 @@ def log_error(request, e):
 
 
 def log_access(request):
+	address = request.remote_addr
 	user_id = session.get("user_id", "")
+	name = session.get("name", "")
+	if user_id:
+		if name:
+			identifier = f"{name} - {user_id} - {address}"
+		else:
+			identifier = f"{user_id} - {address}"
+	else:
+		identifier = address
 	with open("access.log", "a") as file:
-		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {user_id if user_id else request.remote_addr} - \"{request.method} {request.path}\"\n")
+		file.write(f"{datetime.now().strftime('[%Y/%m/%d %H:%M:%S]')} - {identifier} - \"{request.method} {request.path}\"\n")
 
 
 @app.before_request
@@ -302,9 +311,16 @@ def home():
 
 	user_id = get_user_id(session)
 	jobs = get_user_jobs(user_id)
+	name = session.get("name", "")
+
+	if name:
+		message = f"Welcome back, {name}!"
+	else:
+		message = "Welcome to the AI Cover Letter Generator"
+
 
 	if jobs:
-		return render_template("dashboard.html", jobs=jobs)
+		return render_template("dashboard.html", jobs=jobs, message=message)
 	else:
 		if not get_user_path(user_id, "resume.md") or not read_user_file(user_id, "resume.md"):
 			url = "/resume"
@@ -357,6 +373,7 @@ def resume():
 
 			# Save extracted text
 			write_user_file(resume, user_id, path="resume.md")
+			session["name"] = name_from_resume(resume)
 
 			# Delete the temporary file
 			os.remove(filename)
@@ -691,7 +708,7 @@ def delete():
     try:
 
         shutil.rmtree(user_path)
-        session.pop("user_id", None)  # Remove user session
+        session.clear()
 
         return redirect("/home") #{"message": "User data deleted successfully."}, 200
 	
