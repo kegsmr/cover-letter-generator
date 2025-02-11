@@ -237,9 +237,9 @@ def log_access(request):
 	name = session.get("name", "")
 	if user_id:
 		if name:
-			identifier = f"{name} - {user_id} - {address}"
+			identifier = f"{address} - {user_id} - {name}"
 		else:
-			identifier = f"{user_id} - {address}"
+			identifier = f"{address} - {user_id}"
 	else:
 		identifier = address
 	with open("access.log", "a") as file:
